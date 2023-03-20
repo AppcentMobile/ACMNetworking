@@ -38,8 +38,8 @@ public struct ACMBaseEndpoint {
     var url: URL? {
         var components = URLComponents()
         components.scheme = scheme.rawValue
+        components.host = host
         components.path = updatedPath
-        components.path = path
         components.queryItems = queryItems
         return components.url
     }
