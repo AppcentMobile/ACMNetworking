@@ -4,21 +4,21 @@
 
 import Foundation
 
-public class ACMNetworking {
-    open var errorMessage = "An error occurred."
-    open var responseInfoMessage = "RESPONSE:"
-    open var responseNullMessage = "Response null"
-    open var dataNullMessage = "Data null"
-    open var dataParseSuccessMessage = "Data parsed successfully"
-    open var dataParseErrorMessage = "Data parsing error : %@"
-    open var urlRequestErrorMessage = "URL Request Error"
-    open var httpStatusError = "HTTP Status error"
-    open var httpURLMessage = "HTTP URL:"
-    open var httpAuthHeadersMessage = "HTTP AUTH HEADERS:"
-    open var httpHeadersMessage = "HTTP HEADERS:"
-    open var httpQueryItemsMessage = "HTTP QUERYITEMS:"
-    open var httpBodyMessage = "HTTP BODY:"
-    open var httpRequestType = "HTTP Request TYPE:"
+public struct ACMNetworking {
+    public var errorMessage = "An error occurred."
+    public var responseInfoMessage = "RESPONSE:"
+    public var responseNullMessage = "Response null"
+    public var dataNullMessage = "Data null"
+    public var dataParseSuccessMessage = "Data parsed successfully"
+    public var dataParseErrorMessage = "Data parsing error : %@"
+    public var urlRequestErrorMessage = "URL Request Error"
+    public var httpStatusError = "HTTP Status error"
+    public var httpURLMessage = "HTTP URL:"
+    public var httpAuthHeadersMessage = "HTTP AUTH HEADERS:"
+    public var httpHeadersMessage = "HTTP HEADERS:"
+    public var httpQueryItemsMessage = "HTTP QUERYITEMS:"
+    public var httpBodyMessage = "HTTP BODY:"
+    public var httpRequestType = "HTTP Request TYPE:"
 
     public init() {}
 
@@ -83,11 +83,7 @@ public class ACMNetworking {
             return
         }
 
-        let dataTask = endpoint.session.dataTask(with: urlRequest) { [weak self] data, response, error in
-            guard let self = self else {
-                return
-            }
-
+        let dataTask = endpoint.session.dataTask(with: urlRequest) { data, response, error in
             guard error == nil else {
                 let message = ACMStringUtils.shared.merge(list: [
                     self.errorMessage,

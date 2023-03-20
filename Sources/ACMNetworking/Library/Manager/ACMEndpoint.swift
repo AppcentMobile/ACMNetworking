@@ -24,6 +24,11 @@ public final class ACMEndpoint {
         return self
     }
 
+    public func set(scheme: ACMBaseScheme) -> ACMEndpoint {
+        self.scheme = scheme
+        return self
+    }
+
     public func set(path: String) -> ACMEndpoint {
         self.path = path
         return self
