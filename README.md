@@ -4,6 +4,11 @@ ACMNetworking is a network library that help developers to make requests easily.
 
 ## Install
 
+Via Cocoapods
+```bash
+pod 'ACMNetworking'
+```
+
 Via SPM, add new package, search url below
 ```bash
 https://github.com/AppcentMobile/ACMNetworking
