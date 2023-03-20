@@ -1,5 +1,5 @@
 //
-//  BAPathModel.swift
+//  ACMPathModel.swift
 //
 
 public struct ACMPathModel {

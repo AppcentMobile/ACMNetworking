@@ -20,7 +20,7 @@ extension ACMPropertyListSerializationError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .fileNotFound:
-            return NSLocalizedString(String(format: "File %@.plist not found", "BAConfig"), comment: "fileNotFound")
+            return NSLocalizedString(String(format: "File %@.%@ not found", ACMPListContants.fileName, ACMPListContants.fileExtension), comment: "fileNotFound")
         case .fileNotParsed:
             return NSLocalizedString("File could not be parsed", comment: "fileNotParsed")
         case .dataNotAvailable:
