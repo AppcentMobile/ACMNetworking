@@ -1,6 +1,6 @@
 # ACMNetworking
 
-ACMNetworking is package help developers to make requests easily.
+ACMNetworking is a network library that help developers to make requests easily.
 
 ## Install
 
