@@ -47,7 +47,7 @@ network.request(to: endpoint) { (r: BaseResult<ProductResponse?, Error>) in
 
 ## Example Project
 
-https://github.com/kilitbilgi/BANetworkSample
+https://github.com/AppcentMobile/ACMNetworkingSample
 
 ## License
 
