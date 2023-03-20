@@ -38,7 +38,7 @@ public struct ACMBaseEndpoint {
     var url: URL? {
         var components = URLComponents()
         components.scheme = scheme.rawValue
-        components.host = host
+        components.path = updatedPath
         components.path = path
         components.queryItems = queryItems
         return components.url
@@ -108,5 +108,15 @@ public struct ACMBaseEndpoint {
         self.headers = headers
         self.method = method
         self.authHeader = authHeader
+    }
+}
+
+private extension ACMBaseEndpoint {
+    var updatedPath: String {
+        if path.starts(with: "/") {
+            return path
+        } else {
+            return String(format: "/%@", path)
+        }
     }
 }
