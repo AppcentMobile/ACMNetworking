@@ -56,5 +56,5 @@ https://github.com/AppcentMobile/ACMNetworkingSample
 
 ## License
 
- * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+ * Apache License 2.0 ([LICENCE-Apache-2.0](LICENCE) or https://opensource.org/license/apache-2-0/)
 
