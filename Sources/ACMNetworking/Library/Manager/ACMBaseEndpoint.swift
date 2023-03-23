@@ -48,6 +48,10 @@ public struct ACMBaseEndpoint {
 
     var authHeader: String?
 
+    // MARK: Retry count
+
+    var retryCount: Int?
+
     // MARK: Generated url request
 
     var urlRequest: URLRequest? {
@@ -95,7 +99,7 @@ public struct ACMBaseEndpoint {
         return URLSession(configuration: configuration, delegate: nil, delegateQueue: OperationQueue.main)
     }
 
-    init(host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: String? = nil) {
+    init(host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: String? = nil, retryCount: Int? = nil) {
         if let host = host {
             self.host = host
         } else {
@@ -108,6 +112,7 @@ public struct ACMBaseEndpoint {
         self.headers = headers
         self.method = method
         self.authHeader = authHeader
+        self.retryCount = retryCount
     }
 }
 

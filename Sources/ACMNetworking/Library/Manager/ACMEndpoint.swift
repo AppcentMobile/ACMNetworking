@@ -18,34 +18,35 @@ public final class ACMEndpoint {
     var headersModel: [ACMHeaderModel]?
     var method: ACMBaseMethod = .get
     var authHeader: String?
+    var retryCount: Int?
 
-    public func set(host: String) -> ACMEndpoint {
+    public func set(host: String) -> Self {
         self.host = host
         return self
     }
 
-    public func set(scheme: ACMBaseScheme) -> ACMEndpoint {
+    public func set(scheme: ACMBaseScheme) -> Self {
         self.scheme = scheme
         return self
     }
 
-    public func set(path: String) -> ACMEndpoint {
+    public func set(path: String) -> Self {
         self.path = path
         return self
     }
 
-    public func set(path: ACMPathModel) -> ACMEndpoint {
+    public func set(path: ACMPathModel) -> Self {
         let pathQuery = [path.path, path.value].joined(separator: "/")
         self.path = pathQuery
         return self
     }
 
-    public func set(method: ACMBaseMethod) -> ACMEndpoint {
+    public func set(method: ACMBaseMethod) -> Self {
         self.method = method
         return self
     }
 
-    public func add(header: ACMHeaderModel) -> ACMEndpoint {
+    public func add(header: ACMHeaderModel) -> Self {
         var headerList = [ACMHeaderModel]()
         if let list = headersModel, list.count > 0 {
             headerList = list
@@ -59,17 +60,17 @@ public final class ACMEndpoint {
         return self
     }
 
-    public func add(headers: [ACMHeaderModel]) -> ACMEndpoint {
+    public func add(headers: [ACMHeaderModel]) -> Self {
         self.headers = ACMHeadersEncoder.encode(with: headers)
         return self
     }
 
-    public func add(authHeader: String) -> ACMEndpoint {
+    public func add(authHeader: String) -> Self {
         self.authHeader = authHeader
         return self
     }
 
-    public func add(queryItem: ACMQueryModel) -> ACMEndpoint {
+    public func add(queryItem: ACMQueryModel) -> Self {
         var queryList = [ACMQueryModel]()
         if let list = queryItemsModel, list.count > 0 {
             queryList = list
@@ -83,12 +84,12 @@ public final class ACMEndpoint {
         return self
     }
 
-    public func add(queryItems: [ACMQueryModel]) -> ACMEndpoint {
+    public func add(queryItems: [ACMQueryModel]) -> Self {
         self.queryItems = ACMQueryParamEncoder.encode(with: queryItems)
         return self
     }
 
-    public func add(param: ACMBodyModel) -> ACMEndpoint {
+    public func add(param: ACMBodyModel) -> Self {
         var paramList = [ACMBodyModel]()
         if let list = paramsModel, list.count > 0 {
             paramList = list
@@ -102,12 +103,17 @@ public final class ACMEndpoint {
         return self
     }
 
-    public func add(params: [ACMBodyModel]) -> ACMEndpoint {
+    public func add(params: [ACMBodyModel]) -> Self {
         self.params = ACMBodyEncoder.encode(with: params)
         return self
     }
 
+    public func retry(_ count: Int) -> Self {
+        retryCount = count
+        return self
+    }
+
     public func build() -> ACMBaseEndpoint {
-        return ACMBaseEndpoint(host: host, scheme: scheme, path: path, queryItems: queryItems, params: params, headers: headers, method: method, authHeader: authHeader)
+        return ACMBaseEndpoint(host: host, scheme: scheme, path: path, queryItems: queryItems, params: params, headers: headers, method: method, authHeader: authHeader, retryCount: retryCount)
     }
 }

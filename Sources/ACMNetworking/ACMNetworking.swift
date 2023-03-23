@@ -22,7 +22,7 @@ public struct ACMNetworking {
 
     public init() {}
 
-    public func baseRequest(to endpoint: ACMBaseEndpoint) -> URLRequest? {
+    private func baseRequest(to endpoint: ACMBaseEndpoint) -> URLRequest? {
         guard let urlRequest = endpoint.urlRequest else {
             ACMBaseLogger.error(urlRequestErrorMessage)
             return nil
@@ -77,7 +77,9 @@ public struct ACMNetworking {
         return urlRequest
     }
 
-    public func request<T: Decodable>(to endpoint: ACMBaseEndpoint, completion: @escaping (ACMBaseResult<T, Error>) -> Void) {
+    public func request<T: Decodable>(to endpoint: ACMBaseEndpoint,
+                                      onSuccess: ACMGenericCallbacks.ResponseCallback<T>,
+                                      onError: ACMGenericCallbacks.ErrorCallback) {
         guard let urlRequest = baseRequest(to: endpoint) else {
             ACMBaseLogger.error(urlRequestErrorMessage)
             return
@@ -90,7 +92,7 @@ public struct ACMNetworking {
                     error?.localizedDescription ?? "",
                 ])
                 ACMBaseLogger.error(message)
-                completion(.failure(ACMBaseNetworkError(message: self.errorMessage, log: error?.localizedDescription, endpoint: endpoint)))
+                onError?(ACMBaseNetworkError(message: self.errorMessage, log: error?.localizedDescription, endpoint: endpoint))
                 return
             }
             guard response != nil else {
@@ -99,7 +101,7 @@ public struct ACMNetworking {
                     self.responseNullMessage,
                 ])
                 ACMBaseLogger.error(message)
-                completion(.failure(ACMBaseNetworkError(message: self.errorMessage, log: self.responseNullMessage, endpoint: endpoint)))
+                onError?(ACMBaseNetworkError(message: self.errorMessage, log: self.responseNullMessage, endpoint: endpoint))
                 return
             }
             guard let data = data else {
@@ -108,7 +110,7 @@ public struct ACMNetworking {
                     self.dataNullMessage,
                 ])
                 ACMBaseLogger.error(message)
-                completion(.failure(ACMBaseNetworkError(message: self.errorMessage, log: self.dataNullMessage, endpoint: endpoint)))
+                onError?(ACMBaseNetworkError(message: self.errorMessage, log: self.dataNullMessage, endpoint: endpoint))
                 return
             }
 
@@ -118,7 +120,7 @@ public struct ACMNetworking {
                     self.dataNullMessage,
                 ])
                 ACMBaseLogger.error(message)
-                completion(.failure(ACMBaseNetworkError(message: self.errorMessage, log: self.dataNullMessage, endpoint: endpoint)))
+                onError?(ACMBaseNetworkError(message: self.errorMessage, log: self.dataNullMessage, endpoint: endpoint))
                 return
             }
 
@@ -128,7 +130,7 @@ public struct ACMNetworking {
                     self.httpStatusError,
                 ])
                 ACMBaseLogger.error(message)
-                completion(.failure(ACMBaseNetworkError(message: self.errorMessage, log: self.httpStatusError, endpoint: endpoint)))
+                onError?(ACMBaseNetworkError(message: self.errorMessage, log: self.httpStatusError, endpoint: endpoint))
                 return
             }
 
@@ -140,7 +142,7 @@ public struct ACMNetworking {
                     String(data: data, encoding: .utf8) ?? "",
                 ])
                 ACMBaseLogger.info(info)
-                completion(.success(responseObject))
+                onSuccess?(responseObject)
             } catch let DecodingError.dataCorrupted(context) {
                 let message = ACMStringUtils.shared.merge(list: [
                     context.debugDescription,
@@ -167,7 +169,7 @@ public struct ACMNetworking {
             } catch let e {
                 let errorMessage = String(format: self.dataParseErrorMessage, e.localizedDescription)
                 ACMBaseLogger.warning(errorMessage)
-                completion(.failure(ACMBaseNetworkError(message: self.errorMessage, log: errorMessage, endpoint: endpoint)))
+                onError?(ACMBaseNetworkError(message: self.errorMessage, log: errorMessage, endpoint: endpoint))
             }
         }
         dataTask.resume()
