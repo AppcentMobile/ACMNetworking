@@ -37,17 +37,11 @@ let endpoint = ACMEndpoint()
 
 - Make request!
 ```bash
-network.request(to: endpoint) { (r: BaseResult<ProductResponse?, Error>) in
-            switch r {
-            case let .success(r):
-                guard let response = r else {
-                    return
-                }
+network.request(to: endpoint) { (response: ProductResponse) in
                 print(response)
-            case let .failure(error):
+            } onError: { error in
                 print(error)
             }
-        }
 ```
 
 ## Example Project
