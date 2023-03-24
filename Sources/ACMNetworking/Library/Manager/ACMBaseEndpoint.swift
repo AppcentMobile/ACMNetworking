@@ -52,6 +52,10 @@ public struct ACMBaseEndpoint {
 
     var retryCount: Int?
 
+    // MARK: Data for media upload
+
+    var mediaData: NSMutableData?
+
     // MARK: Generated url request
 
     var urlRequest: URLRequest? {
@@ -75,10 +79,14 @@ public struct ACMBaseEndpoint {
             }
         }
 
-        if method != .get, let params = params {
+        if method != .get, let params = params, mediaData == nil {
             let httpBody = try? JSONSerialization.data(withJSONObject: params)
             urlRequest.httpBody = httpBody
             urlRequest.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        }
+
+        if let data = mediaData as? Data {
+            urlRequest.httpBody = data
         }
 
         return urlRequest
@@ -99,7 +107,7 @@ public struct ACMBaseEndpoint {
         return URLSession(configuration: configuration, delegate: nil, delegateQueue: OperationQueue.main)
     }
 
-    init(host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: String? = nil, retryCount: Int? = nil) {
+    init(host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: String? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil) {
         if let host = host {
             self.host = host
         } else {
@@ -112,6 +120,7 @@ public struct ACMBaseEndpoint {
         self.headers = headers
         self.method = method
         self.authHeader = authHeader
+        self.mediaData = mediaData
         self.retryCount = retryCount
     }
 }

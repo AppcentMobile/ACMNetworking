@@ -18,6 +18,7 @@ public final class ACMEndpoint {
     var headersModel: [ACMHeaderModel]?
     var method: ACMBaseMethod = .get
     var authHeader: String?
+    var mediaData: NSMutableData?
     var retryCount: Int?
 
     public func set(host: String) -> Self {
@@ -108,12 +109,91 @@ public final class ACMEndpoint {
         return self
     }
 
-    public func retry(_ count: Int) -> Self {
+    public func retry(count: Int) -> Self {
         retryCount = count
         return self
     }
 
+    public func add(model: ACMMultipartModel) -> Self {
+        let fileData = model.data
+        let contentType = ACMNetworkConstants.multipartContentType
+        let boundary = contentType.boundary
+        let fileModel = fileData?.fileModel
+        let fileName = ACMStringUtils.shared.merge(list: [
+            ProcessInfo.processInfo.globallyUniqueString,
+            fileModel?.ext ?? "",
+        ])
+
+        let endpoint = set(method: .post)
+            .add(header: ACMNetworkConstants.multipartHeader(model: contentType))
+            .add(header: ACMNetworkConstants.multipartDataAccept)
+
+        let body = NSMutableData()
+        if let data = "--\(boundary)\r\n".toData {
+            body.append(data)
+        }
+
+        let contentDispositionMini = ACMStringUtils.shared.merge(list: [
+            "Content-Disposition: form-data;",
+            " ",
+            model.key ?? "",
+            "=",
+            model.value ?? "",
+            "\r\n\r\n",
+        ])
+
+        if let data = contentDispositionMini.toData {
+            body.append(data)
+        }
+
+        if let data = "\(fileName)\r\n".toData {
+            body.append(data)
+        }
+
+        if let data = "--\(boundary)\r\n".toData {
+            body.append(data)
+        }
+
+        let contentDisposition = ACMStringUtils.shared.merge(list: [
+            "Content-Disposition: form-data;",
+            " ",
+            model.key ?? "",
+            "=",
+            model.value ?? "",
+            ";",
+            " ",
+            model.fileKey ?? "",
+            "=",
+            model.fileValue ?? "",
+            "\r\n",
+        ])
+
+        if let data = contentDisposition.toData {
+            body.append(data)
+        }
+
+        if let data = String(format: "Content-Type:%@\r\n\r\n", fileModel?.mime ?? "").data(using: .utf8) {
+            body.append(data)
+        }
+
+        if let data = fileData {
+            body.append(data)
+        }
+
+        if let data = "\r\n".data(using: String.Encoding.utf8) {
+            body.append(data)
+        }
+
+        if let data = "--\(boundary)--\r\n".data(using: String.Encoding.utf8) {
+            body.append(data)
+        }
+
+        endpoint.mediaData = body
+
+        return endpoint
+    }
+
     public func build() -> ACMBaseEndpoint {
-        return ACMBaseEndpoint(host: host, scheme: scheme, path: path, queryItems: queryItems, params: params, headers: headers, method: method, authHeader: authHeader, retryCount: retryCount)
+        return ACMBaseEndpoint(host: host, scheme: scheme, path: path, queryItems: queryItems, params: params, headers: headers, method: method, authHeader: authHeader, mediaData: mediaData, retryCount: retryCount)
     }
 }
