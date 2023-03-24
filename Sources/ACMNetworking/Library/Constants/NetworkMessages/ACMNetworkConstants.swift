@@ -19,6 +19,7 @@ public enum ACMNetworkConstants {
     public static var httpQueryItemsMessage = "HTTP QUERYITEMS:"
     public static var httpBodyMessage = "HTTP BODY:"
     public static var httpRequestType = "HTTP Request TYPE:"
+    public static var httpBodyMultipart = "Multipart data"
 }
 
 public struct ACMMultipartContentTypeModel {

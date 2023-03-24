@@ -114,8 +114,8 @@ public final class ACMEndpoint {
         return self
     }
 
-    public func add(model: ACMMultipartModel) -> Self {
-        let fileData = model.data
+    public func add(media: ACMMultipartModel) -> Self {
+        let fileData = media.data
         let contentType = ACMNetworkConstants.multipartContentType
         let boundary = contentType.boundary
         let fileModel = fileData?.fileModel
@@ -136,9 +136,9 @@ public final class ACMEndpoint {
         let contentDispositionMini = ACMStringUtils.shared.merge(list: [
             "Content-Disposition: form-data;",
             " ",
-            model.key ?? "",
+            media.key ?? "",
             "=",
-            model.value ?? "",
+            media.value ?? "",
             "\r\n\r\n",
         ])
 
@@ -157,14 +157,14 @@ public final class ACMEndpoint {
         let contentDisposition = ACMStringUtils.shared.merge(list: [
             "Content-Disposition: form-data;",
             " ",
-            model.key ?? "",
+            media.key ?? "",
             "=",
-            model.value ?? "",
+            media.value ?? "",
             ";",
             " ",
-            model.fileKey ?? "",
+            media.fileKey ?? "",
             "=",
-            model.fileValue ?? "",
+            media.fileValue ?? "",
             "\r\n",
         ])
 
