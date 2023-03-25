@@ -21,6 +21,7 @@ public class ACMNetworking {
 
         task = endpoint.session.dataTask(with: urlRequest) { data, response, error in
             guard error == nil else {
+                self.cancel()
                 let message = ACMStringUtils.shared.merge(list: [
                     ACMNetworkConstants.errorMessage,
                     error?.localizedDescription ?? "",
@@ -31,6 +32,7 @@ public class ACMNetworking {
             }
 
             guard response != nil else {
+                self.cancel()
                 let message = ACMStringUtils.shared.merge(list: [
                     ACMNetworkConstants.errorMessage,
                     ACMNetworkConstants.responseNullMessage,
@@ -41,6 +43,7 @@ public class ACMNetworking {
             }
 
             guard let data = data else {
+                self.cancel()
                 let message = ACMStringUtils.shared.merge(list: [
                     ACMNetworkConstants.errorMessage,
                     ACMNetworkConstants.dataNullMessage,
@@ -51,6 +54,7 @@ public class ACMNetworking {
             }
 
             if error?.isConnectivityError ?? false {
+                self.cancel()
                 let message = ACMStringUtils.shared.merge(list: [
                     ACMNetworkConstants.errorMessage,
                     ACMNetworkConstants.dataNullMessage,
@@ -61,6 +65,7 @@ public class ACMNetworking {
             }
 
             guard let httpResponse = response as? HTTPURLResponse else {
+                self.cancel()
                 let message = ACMStringUtils.shared.merge(list: [
                     ACMNetworkConstants.errorMessage,
                     ACMNetworkConstants.httpStatusError,
@@ -82,6 +87,7 @@ public class ACMNetworking {
 
                 guard let maxRetryCount = endpoint.retryCount else {
                     onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.httpStatusError, endpoint: endpoint))
+                    self.cancel()
                     return
                 }
 
@@ -91,10 +97,14 @@ public class ACMNetworking {
                         String(format: ACMNetworkConstants.httpRetryCount, nextRetryCount, maxRetryCount),
                     ]))
                     self.request(to: endpoint, currentRetryCount: nextRetryCount, onSuccess: onSuccess, onError: onError)
+                } else {
+                    self.cancel()
                 }
 
                 return
             }
+
+            self.cancel()
 
             do {
                 let responseObject = try JSONDecoder().decode(T.self, from: data)
@@ -139,5 +149,6 @@ public class ACMNetworking {
 
     func cancel() {
         task?.cancel()
+        task = nil
     }
 }
