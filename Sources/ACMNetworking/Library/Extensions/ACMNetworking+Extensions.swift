@@ -49,10 +49,16 @@ extension ACMNetworking {
             ACMBaseLogger.info(info)
         }
 
-        if urlRequest.httpBody != nil {
+        if let params = endpoint.params {
             let info = ACMStringUtils.shared.merge(list: [
                 ACMNetworkConstants.httpBodyMessage,
-                ACMNetworkConstants.httpBodyMultipart
+                params.paramsRaw,
+            ])
+            ACMBaseLogger.info(info)
+        } else if let data = endpoint.mediaData {
+            let info = ACMStringUtils.shared.merge(list: [
+                ACMNetworkConstants.httpBodyMessage,
+                String(format: ACMNetworkConstants.httpBodyMultipart, "\(data.length)"),
             ])
             ACMBaseLogger.info(info)
         }

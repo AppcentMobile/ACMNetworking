@@ -6,6 +6,7 @@ import Foundation
 
 public enum ACMNetworkConstants {
     public static var errorMessage = "An error occurred."
+    public static var errorURLMessage = "Error: URL couldn't create"
     public static var responseInfoMessage = "RESPONSE:"
     public static var responseNullMessage = "Response null"
     public static var dataNullMessage = "Data null"
@@ -19,12 +20,7 @@ public enum ACMNetworkConstants {
     public static var httpQueryItemsMessage = "HTTP QUERYITEMS:"
     public static var httpBodyMessage = "HTTP BODY:"
     public static var httpRequestType = "HTTP Request TYPE:"
-    public static var httpBodyMultipart = "Multipart data"
-}
-
-public struct ACMMultipartContentTypeModel {
-    var type: String
-    var boundary: String
+    public static var httpBodyMultipart = "Multipart data, length: %@"
 }
 
 public extension ACMNetworkConstants {
@@ -44,4 +40,9 @@ public extension ACMNetworkConstants {
     static var multipartDataAccept: ACMHeaderModel {
         ACMHeaderModel(field: "Accept", value: "application/json")
     }
+}
+
+public extension ACMNetworkConstants {
+    static var headerContentTypeJSON = ACMHeaderModel(field: "Content-Type", value: "application/json; charset=utf-8")
+    static var headerAuthorization = "Authorization"
 }

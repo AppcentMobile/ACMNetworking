@@ -133,19 +133,6 @@ public final class ACMEndpoint {
             body.append(data)
         }
 
-        let contentDispositionMini = ACMStringUtils.shared.merge(list: [
-            "Content-Disposition: form-data;",
-            " ",
-            media.key ?? "",
-            "=",
-            media.value ?? "",
-            "\r\n\r\n",
-        ])
-
-        if let data = contentDispositionMini.toData {
-            body.append(data)
-        }
-
         if let data = "\(fileName)\r\n".toData {
             body.append(data)
         }
@@ -154,22 +141,20 @@ public final class ACMEndpoint {
             body.append(data)
         }
 
-        let contentDisposition = ACMStringUtils.shared.merge(list: [
-            "Content-Disposition: form-data;",
-            " ",
-            media.key ?? "",
-            "=",
-            media.value ?? "",
-            ";",
-            " ",
-            media.fileKey ?? "",
-            "=",
-            media.fileValue ?? "",
-            "\r\n",
-        ])
+        if let params = media.params {
+            let paramsRaw = params.map {
+                " \($0.key)=\($0.value);"
+            }.joined(separator: "")
 
-        if let data = contentDisposition.toData {
-            body.append(data)
+            let contentDisposition = ACMStringUtils.shared.merge(list: [
+                "Content-Disposition: form-data;",
+                paramsRaw,
+                "\r\n",
+            ])
+
+            if let data = contentDisposition.toData {
+                body.append(data)
+            }
         }
 
         if let data = String(format: "Content-Type:%@\r\n\r\n", fileModel?.mime ?? "").data(using: .utf8) {
