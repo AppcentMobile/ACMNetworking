@@ -10,6 +10,7 @@ public class ACMNetworking {
     public init() {}
 
     public func request<T: Decodable>(to endpoint: ACMBaseEndpoint,
+                                      currentRetryCount: Int? = 0,
                                       onSuccess: ACMGenericCallbacks.ResponseCallback<T>,
                                       onError: ACMGenericCallbacks.ErrorCallback)
     {
@@ -19,10 +20,6 @@ public class ACMNetworking {
         }
 
         task = endpoint.session.dataTask(with: urlRequest) { data, response, error in
-            defer {
-                self.task = nil
-            }
-
             guard error == nil else {
                 let message = ACMStringUtils.shared.merge(list: [
                     ACMNetworkConstants.errorMessage,
@@ -32,6 +29,7 @@ public class ACMNetworking {
                 onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: error?.localizedDescription, endpoint: endpoint))
                 return
             }
+
             guard response != nil else {
                 let message = ACMStringUtils.shared.merge(list: [
                     ACMNetworkConstants.errorMessage,
@@ -41,6 +39,7 @@ public class ACMNetworking {
                 onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.responseNullMessage, endpoint: endpoint))
                 return
             }
+
             guard let data = data else {
                 let message = ACMStringUtils.shared.merge(list: [
                     ACMNetworkConstants.errorMessage,
@@ -70,6 +69,7 @@ public class ACMNetworking {
                 onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.httpStatusError, endpoint: endpoint))
                 return
             }
+
             guard 200 ..< 300 ~= httpResponse.statusCode else {
                 let message = ACMStringUtils.shared.merge(list: [
                     ACMNetworkConstants.errorMessage,
@@ -77,7 +77,22 @@ public class ACMNetworking {
                     "-\(httpResponse.statusCode)",
                 ])
                 ACMBaseLogger.error(message)
-                onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.httpStatusError, endpoint: endpoint))
+
+                // MARK: Retry mechanism
+
+                guard let maxRetryCount = endpoint.retryCount else {
+                    onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.httpStatusError, endpoint: endpoint))
+                    return
+                }
+
+                if let currentRetryCount = currentRetryCount, currentRetryCount < maxRetryCount {
+                    let nextRetryCount = currentRetryCount + 1
+                    ACMBaseLogger.info(ACMStringUtils.shared.merge(list: [
+                        String(format: ACMNetworkConstants.httpRetryCount, nextRetryCount, maxRetryCount),
+                    ]))
+                    self.request(to: endpoint, currentRetryCount: nextRetryCount, onSuccess: onSuccess, onError: onError)
+                }
+
                 return
             }
 

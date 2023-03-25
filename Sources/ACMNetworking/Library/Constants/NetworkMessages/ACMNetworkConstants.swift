@@ -21,6 +21,7 @@ public enum ACMNetworkConstants {
     public static var httpBodyMessage = "HTTP BODY:"
     public static var httpRequestType = "HTTP Request TYPE:"
     public static var httpBodyMultipart = "Multipart data, length: %@"
+    public static var httpRetryCount = "Current retry count is %d, total retry count is %d"
 }
 
 public extension ACMNetworkConstants {
