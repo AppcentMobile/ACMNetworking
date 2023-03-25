@@ -98,12 +98,12 @@ public struct ACMBaseEndpoint {
         return model
     }
 
-    var session: URLSession {
+    func session(delegate: URLSessionDelegate) -> URLSession {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = config.timeout
         configuration.timeoutIntervalForResource = config.timeout
 
-        return URLSession(configuration: configuration, delegate: nil, delegateQueue: OperationQueue.main)
+        return URLSession(configuration: configuration, delegate: delegate, delegateQueue: OperationQueue.main)
     }
 
     init(host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: String? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil) {
