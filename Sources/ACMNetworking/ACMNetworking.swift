@@ -4,13 +4,26 @@
 
 import Foundation
 
+/// ACMNetworking, make requests easily
 public class ACMNetworking: NSObject {
     private var task: URLSessionDataTask?
 
+    /// Public Init function
+    /// For creating object with SDK
     public override init() {
         super.init()
     }
 
+    /// Main request function
+    ///
+    /// - Parameters:
+    ///     - endpoint: base endpoint that keeps all endpoint information
+    ///     - currentRetryCount(Optional): retry request count
+    ///     - onSuccess: Callback for success scenario
+    ///     - onError: Callback for error scenario
+    ///
+    /// - Returns:
+    ///     - Void
     public func request<T: Decodable>(to endpoint: ACMBaseEndpoint,
                                       currentRetryCount: Int? = 0,
                                       onSuccess: ACMGenericCallbacks.ResponseCallback<T>,
