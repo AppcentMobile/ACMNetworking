@@ -4,10 +4,12 @@
 
 import Foundation
 
-public class ACMNetworking {
+public class ACMNetworking: NSObject {
     private var task: URLSessionDataTask?
 
-    public init() {}
+    public override init() {
+        super.init()
+    }
 
     public func request<T: Decodable>(to endpoint: ACMBaseEndpoint,
                                       currentRetryCount: Int? = 0,
@@ -19,7 +21,7 @@ public class ACMNetworking {
             return
         }
 
-        task = endpoint.session.dataTask(with: urlRequest) { data, response, error in
+        task = endpoint.session(delegate: self).dataTask(with: urlRequest) { data, response, error in
             guard error == nil else {
                 self.cancel()
                 let message = ACMStringUtils.shared.merge(list: [

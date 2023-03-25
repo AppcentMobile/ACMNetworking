@@ -66,3 +66,38 @@ extension ACMNetworking {
         return urlRequest
     }
 }
+
+extension ACMNetworking: URLSessionTaskDelegate {
+
+    public func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
+        let message = ACMStringUtils.shared.merge(list: [
+            "didFinishCollecting",
+            task.description,
+            "metrics",
+            "\(metrics.taskInterval)"
+        ])
+        ACMBaseLogger.info(message)
+    }
+
+    public func urlSession(_ session: URLSession, taskIsWaitingForConnectivity task: URLSessionTask) {
+        let message = ACMStringUtils.shared.merge(list: [
+            "taskIsWaitingForConnectivity",
+            task.description
+        ])
+        ACMBaseLogger.info(message)
+    }
+
+    public func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
+        let message = ACMStringUtils.shared.merge(list: [
+            "task",
+            task.description,
+            "didSendBodyData",
+            "\(bytesSent)",
+            "totalBytesSent",
+            "\(totalBytesSent)",
+            "totalBytesExpectedToSend",
+            "\(totalBytesExpectedToSend)"
+        ])
+        ACMBaseLogger.info(message)
+    }
+}
