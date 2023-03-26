@@ -13,6 +13,7 @@ public final class ACMEndpoint {
     /// Init method for creating new object
     public init() {}
 
+    var overrideConfig: Bool = false
     var host: String?
     var scheme: ACMBaseScheme = .https
     var path = ""
@@ -26,6 +27,18 @@ public final class ACMEndpoint {
     var authHeader: String?
     var mediaData: NSMutableData?
     var retryCount: Int?
+
+    /// Update override plist
+    ///
+    /// - Parameters:
+    ///     - overrideConfig: Bool
+    ///
+    /// - Returns
+    ///     - Self
+    public func update(overrideConfig: Bool) -> Self {
+        self.overrideConfig = overrideConfig
+        return self
+    }
 
     /// Sets the Host
     ///
@@ -287,6 +300,6 @@ public final class ACMEndpoint {
     /// - Returns
     ///     - Self
     public func build() -> ACMBaseEndpoint {
-        return ACMBaseEndpoint(host: host, scheme: scheme, path: path, queryItems: queryItems, params: params, headers: headers, method: method, authHeader: authHeader, mediaData: mediaData, retryCount: retryCount)
+        return ACMBaseEndpoint(overrideConfig: overrideConfig, host: host, scheme: scheme, path: path, queryItems: queryItems, params: params, headers: headers, method: method, authHeader: authHeader, mediaData: mediaData, retryCount: retryCount)
     }
 }
