@@ -56,6 +56,8 @@ final class ACMPlistUtils {
     }
 
     private func throwFatalError(with error: ACMPropertyListSerializationError) {
-        fatalError(error.localizedDescription)
+        if ACMNetworkingConstants.configOverride == false {
+            fatalError(error.localizedDescription)
+        }
     }
 }

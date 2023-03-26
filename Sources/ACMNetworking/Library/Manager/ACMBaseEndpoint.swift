@@ -10,7 +10,7 @@ import Foundation
 public struct ACMBaseEndpoint {
     // MARK: Override fetching config file
 
-    var overrideConfig: Bool = false
+    var configOverride: Bool = false
 
     // MARK: API host
 
@@ -99,10 +99,6 @@ public struct ACMBaseEndpoint {
     }
 
     private var config: ACMPlistModel {
-        if overrideConfig {
-            return emptyConfig
-        }
-
         guard let model = ACMPlistUtils.shared.config else {
             return emptyConfig
         }
@@ -121,8 +117,8 @@ public struct ACMBaseEndpoint {
         return URLSession(configuration: configuration, delegate: delegate, delegateQueue: OperationQueue.main)
     }
 
-    init(overrideConfig: Bool, host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: String? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil) {
-        self.overrideConfig = overrideConfig
+    init(configOverride: Bool, host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: String? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil) {
+        ACMNetworkingConstants.configOverride = configOverride
         if let host = host {
             self.host = host
         } else {

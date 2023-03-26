@@ -8,7 +8,6 @@ import Foundation
 ///
 /// Encoder for headers
 final class ACMHeadersEncoder {
-
     /// Encode function
     /// For creating headers
     ///    - Parameters:
