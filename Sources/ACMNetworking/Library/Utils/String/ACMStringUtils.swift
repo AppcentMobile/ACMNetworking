@@ -2,6 +2,9 @@
 //  ACMStringUtils.swift
 //
 
+/// ACMStringUtils
+///
+/// String utility for making string actions easily
 public final class ACMStringUtils {
     static let shared = ACMStringUtils()
 

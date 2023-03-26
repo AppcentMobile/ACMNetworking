@@ -162,7 +162,8 @@ public class ACMNetworking: NSObject {
         task?.resume()
     }
 
-    func cancel() {
+    /// Cancels the current network request
+    public func cancel() {
         task?.cancel()
         task = nil
     }

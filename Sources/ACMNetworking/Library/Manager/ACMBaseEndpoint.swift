@@ -4,6 +4,9 @@
 
 import Foundation
 
+/// ACMBaseEndpoint
+///
+/// Base endpoint struct for holding endpoint information
 public struct ACMBaseEndpoint {
     // MARK: API host
 

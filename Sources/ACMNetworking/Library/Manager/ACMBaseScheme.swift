@@ -2,6 +2,12 @@
 //  ACMBaseScheme.swift
 //
 
+/// ACMBaseScheme
+///
+/// Enumeration for holding network scheme
 public enum ACMBaseScheme: String {
-    case http, https
+    /// HTTP scheme
+    case http
+    /// HTTPS scheme
+    case https
 }

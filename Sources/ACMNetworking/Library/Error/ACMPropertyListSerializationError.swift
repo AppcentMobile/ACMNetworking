@@ -4,19 +4,32 @@
 
 import Foundation
 
+/// ACMPropertyListSerializationError
+///
+/// Enumeration for holding the data serialization errors
 public enum ACMPropertyListSerializationError: Error {
+    /// Serialization error when file is not found in plist
     case fileNotFound
+    /// Serialization error when file plist is not parsed
     case fileNotParsed
+    /// Serialization error when plist data not available
     case dataNotAvailable
+    /// Serialization error when plist model not parsed
     case modelNotParsed
+    /// Serialization error when config not loaded
     case configNotLoaded
+    /// Serialization error when plist data is corrupted
     case dataCorrupted(context: DecodingError.Context)
+    /// Serialization error when coding key is not found
     case keyNotFound(key: CodingKey, context: DecodingError.Context)
+    /// Serialization error when plist property value is not found
     case valueNotFound(value: Any, context: DecodingError.Context)
+    /// Serialization error when value type is not matched in plist
     case typeMismatch(type: Any, context: DecodingError.Context)
 }
 
 extension ACMPropertyListSerializationError: LocalizedError {
+    /// Error description holds plist serialization errors
     public var errorDescription: String? {
         switch self {
         case .fileNotFound:
