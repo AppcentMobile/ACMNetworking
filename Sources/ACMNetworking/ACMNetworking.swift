@@ -10,7 +10,7 @@ public class ACMNetworking: NSObject {
 
     /// Public Init function
     /// For creating object with SDK
-    public override init() {
+    override public init() {
         super.init()
     }
 

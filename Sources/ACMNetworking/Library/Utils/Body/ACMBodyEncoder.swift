@@ -8,7 +8,6 @@ import Foundation
 ///
 /// Encoder for body payload
 final class ACMBodyEncoder {
-
     /// Encode function
     /// For creating body payload
     ///    - Parameters:
