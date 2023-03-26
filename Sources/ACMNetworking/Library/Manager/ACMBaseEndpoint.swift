@@ -121,7 +121,8 @@ public struct ACMBaseEndpoint {
         return URLSession(configuration: configuration, delegate: delegate, delegateQueue: OperationQueue.main)
     }
 
-    init(host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: String? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil) {
+    init(overrideConfig: Bool? = false, host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: String? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil) {
+        self.overrideConfig = overrideConfig ?? false
         if let host = host {
             self.host = host
         } else {
