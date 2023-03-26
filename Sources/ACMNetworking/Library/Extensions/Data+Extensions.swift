@@ -4,11 +4,6 @@
 
 import Foundation
 
-public struct ACMFileModel {
-    var ext: String
-    var mime: String
-}
-
 extension Data {
     private static let mimeTypeSignatures: [UInt8: String] = [
         0xFF: "image/jpeg",

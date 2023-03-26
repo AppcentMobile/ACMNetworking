@@ -4,6 +4,9 @@
 
 import Foundation
 
+/// ACMPlistUtils
+///
+/// Utility class for plist
 final class ACMPlistUtils {
     static let shared = ACMPlistUtils()
 
