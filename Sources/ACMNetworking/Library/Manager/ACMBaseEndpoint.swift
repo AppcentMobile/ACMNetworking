@@ -8,6 +8,10 @@ import Foundation
 ///
 /// Base endpoint struct for holding endpoint information
 public struct ACMBaseEndpoint {
+    // MARK: Override fetching config file
+
+    var overrideConfig: Bool = false
+
     // MARK: API host
 
     var host: String?
@@ -95,10 +99,18 @@ public struct ACMBaseEndpoint {
     }
 
     private var config: ACMPlistModel {
+        if overrideConfig {
+            return emptyConfig
+        }
+
         guard let model = ACMPlistUtils.shared.config else {
-            return ACMPlistModel(baseURL: "", timeout: 0, isLogEnabled: false)
+            return emptyConfig
         }
         return model
+    }
+
+    var emptyConfig: ACMPlistModel {
+        ACMPlistModel(baseURL: "", timeout: 0, isLogEnabled: false)
     }
 
     func session(delegate: URLSessionDelegate) -> URLSession {
