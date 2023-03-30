@@ -13,6 +13,7 @@ public final class ACMEndpoint {
     /// Init method for creating new object
     public init() {}
 
+    var config: ACMPlistModel?
     var configOverride: Bool = false
     var host: String?
     var scheme: ACMBaseScheme = .https
@@ -27,6 +28,18 @@ public final class ACMEndpoint {
     var authHeader: String?
     var mediaData: NSMutableData?
     var retryCount: Int?
+
+    /// Set config model
+    ///
+    /// - Parameters:
+    ///     - config: ACMPlistModel
+    ///
+    /// - Returns
+    ///     - Self
+    public func set(config: ACMPlistModel) -> Self {
+        self.config = config
+        return self
+    }
 
     /// Update override plist
     ///
@@ -300,6 +313,6 @@ public final class ACMEndpoint {
     /// - Returns
     ///     - Self
     public func build() -> ACMBaseEndpoint {
-        return ACMBaseEndpoint(configOverride: configOverride, host: host, scheme: scheme, path: path, queryItems: queryItems, params: params, headers: headers, method: method, authHeader: authHeader, mediaData: mediaData, retryCount: retryCount)
+        return ACMBaseEndpoint(config: config, configOverride: configOverride, host: host, scheme: scheme, path: path, queryItems: queryItems, params: params, headers: headers, method: method, authHeader: authHeader, mediaData: mediaData, retryCount: retryCount)
     }
 }
