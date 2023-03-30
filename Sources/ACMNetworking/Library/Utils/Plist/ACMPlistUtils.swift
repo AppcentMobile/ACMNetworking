@@ -7,10 +7,18 @@ import Foundation
 /// ACMPlistUtils
 ///
 /// Utility class for plist
-final class ACMPlistUtils {
-    static let shared = ACMPlistUtils()
+public final class ACMPlistUtils {
+    public static let shared = ACMPlistUtils()
 
-    var config: ACMPlistModel? {
+    public func config<T: Codable>(type _: T.Type? = ACMPlistModel) -> T? {
+        guard let data = getData(), let plist = getList(with: data, type: T.self) else {
+            throwFatalError(with: ACMPropertyListSerializationError.fileNotParsed)
+            return nil
+        }
+        return plist
+    }
+
+    private func getData() -> Data? {
         guard let path = Bundle.main.path(forResource: ACMPListContants.fileName, ofType: ACMPListContants.fileExtension) else {
             throwFatalError(with: ACMPropertyListSerializationError.fileNotFound)
             return nil
@@ -18,25 +26,17 @@ final class ACMPlistUtils {
         let url = URL(fileURLWithPath: path)
 
         do {
-            let data = try Data(contentsOf: url)
-
-            guard let plist = getList(with: data) else {
-                throwFatalError(with: ACMPropertyListSerializationError.fileNotParsed)
-                return nil
-            }
-
-            return plist
+            return try Data(contentsOf: url)
         } catch {
             throwFatalError(with: ACMPropertyListSerializationError.dataNotAvailable)
             return nil
         }
     }
 
-    private func getList(with data: Data) -> ACMPlistModel? {
+    private func getList<T: Codable>(with data: Data, type: T.Type) -> T? {
         let decoder = PropertyListDecoder()
         do {
-            let model = try decoder.decode(ACMPlistModel.self, from: data)
-            return model
+            return try decoder.decode(T.self, from: data)
         } catch let DecodingError.dataCorrupted(context) {
             throwFatalError(with: ACMPropertyListSerializationError.dataCorrupted(context: context))
             return nil

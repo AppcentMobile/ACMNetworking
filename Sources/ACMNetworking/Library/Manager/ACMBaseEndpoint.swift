@@ -8,6 +8,10 @@ import Foundation
 ///
 /// Base endpoint struct for holding endpoint information
 public struct ACMBaseEndpoint {
+    // MARK: Config
+
+    var config: ACMPlistModel?
+
     // MARK: Override fetching config file
 
     var configOverride: Bool = false
@@ -98,31 +102,26 @@ public struct ACMBaseEndpoint {
         return urlRequest
     }
 
-    private var config: ACMPlistModel {
-        guard let model = ACMPlistUtils.shared.config else {
-            return emptyConfig
-        }
-        return model
-    }
-
-    var emptyConfig: ACMPlistModel {
-        ACMPlistModel(baseURL: "", timeout: 0, isLogEnabled: false)
-    }
-
     func session(delegate: URLSessionDelegate) -> URLSession {
         let configuration = URLSessionConfiguration.default
-        configuration.timeoutIntervalForRequest = config.timeout
-        configuration.timeoutIntervalForResource = config.timeout
+        configuration.timeoutIntervalForRequest = config?.timeout ?? 0
+        configuration.timeoutIntervalForResource = config?.timeout ?? 0
 
         return URLSession(configuration: configuration, delegate: delegate, delegateQueue: OperationQueue.main)
     }
 
-    init(configOverride: Bool, host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: String? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil) {
+    init(config: ACMPlistModel? = nil, configOverride: Bool, host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: String? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil) {
+        if let config = config {
+            self.config = config
+        } else {
+            self.config = ACMPlistUtils.shared.config()
+        }
+        ACMBaseLogger.shared.config = self.config
         ACMNetworkingConstants.configOverride = configOverride
         if let host = host {
             self.host = host
         } else {
-            self.host = config.baseURL
+            self.host = self.config?.baseURL
         }
         self.scheme = scheme
         self.path = path

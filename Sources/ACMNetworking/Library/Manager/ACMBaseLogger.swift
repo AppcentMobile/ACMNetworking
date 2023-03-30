@@ -9,11 +9,13 @@ final class ACMBaseLogger {
     /// shared instance
     static var shared = ACMBaseLogger()
 
+    var config: ACMPlistModel?
+
     private init() {}
 
     /// is BaseLoggerging enable
     var isEnabled: Bool {
-        return ACMPlistUtils.shared.config?.isLogEnabled ?? false
+        return config?.isLogEnabled ?? false
     }
 
     /// BaseLogger for success. Will add ✅ emoji to see better
