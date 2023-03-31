@@ -10,7 +10,7 @@ import Foundation
 public final class ACMPlistUtils {
     public static let shared = ACMPlistUtils()
 
-    public func config<T: Codable>(type _: T.Type? = ACMPlistModel) -> T? {
+    public func config<T: Codable>(type _: T.Type? = ACMPlistModel.self) -> T? {
         guard let data = getData(), let plist = getList(with: data, type: T.self) else {
             throwFatalError(with: ACMPropertyListSerializationError.fileNotParsed)
             return nil
