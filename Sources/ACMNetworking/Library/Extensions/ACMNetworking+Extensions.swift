@@ -25,7 +25,7 @@ extension ACMNetworking {
             ACMBaseLogger.info(info)
         }
 
-        if let authHeader = endpoint.authHeader, authHeader.count > 0 {
+        if let authHeader = endpoint.authHeader {
             let info = ACMStringUtils.shared.merge(list: [
                 ACMNetworkConstants.httpAuthHeadersMessage,
                 "\(authHeader)",
