@@ -57,7 +57,7 @@ public struct ACMBaseEndpoint {
 
     // MARK: Auth header
 
-    var authHeader: String?
+    var authHeader: ACMAuthModel?
 
     // MARK: Retry count
 
@@ -79,7 +79,7 @@ public struct ACMBaseEndpoint {
         urlRequest.httpMethod = method.rawValue
 
         if let header = authHeader {
-            urlRequest.setValue(header, forHTTPHeaderField: ACMNetworkConstants.headerAuthorization)
+            urlRequest.setValue(header.rawHeader, forHTTPHeaderField: ACMNetworkConstants.headerAuthorization)
         }
 
         if let basicHeaders = headers {
@@ -110,7 +110,7 @@ public struct ACMBaseEndpoint {
         return URLSession(configuration: configuration, delegate: delegate, delegateQueue: OperationQueue.main)
     }
 
-    init(config: ACMPlistModel? = nil, configOverride: Bool, host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: String? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil) {
+    init(config: ACMPlistModel? = nil, configOverride: Bool, host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: ACMAuthModel? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil) {
         if let config = config {
             self.config = config
         } else {

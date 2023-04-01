@@ -25,7 +25,7 @@ public final class ACMEndpoint {
     var headers: NSMutableDictionary?
     var headersModel: [ACMHeaderModel]?
     var method: ACMBaseMethod = .get
-    var authHeader: String?
+    var authHeader: ACMAuthModel?
     var mediaData: NSMutableData?
     var retryCount: Int?
 
@@ -154,7 +154,7 @@ public final class ACMEndpoint {
     ///
     /// - Returns
     ///     - Self
-    public func add(authHeader: String) -> Self {
+    public func add(authHeader: ACMAuthModel) -> Self {
         self.authHeader = authHeader
         return self
     }
