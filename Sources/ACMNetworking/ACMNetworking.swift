@@ -95,6 +95,8 @@ public class ACMNetworking: NSObject {
                     ACMNetworkConstants.errorMessage,
                     ACMNetworkConstants.httpStatusError,
                     "-\(httpResponse.statusCode)",
+                    ACMNetworkConstants.responseInfoMessage,
+                    String(data: data, encoding: .utf8) ?? ""
                 ])
                 ACMBaseLogger.error(message)
 
