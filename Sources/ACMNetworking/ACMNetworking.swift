@@ -124,13 +124,13 @@ public class ACMNetworking: NSObject {
             self.cancel()
 
             do {
-                let responseObject = try JSONDecoder().decode(T.self, from: data)
-
                 let info = ACMStringUtils.shared.merge(list: [
                     ACMNetworkConstants.responseInfoMessage,
                     String(data: data, encoding: .utf8) ?? "",
                 ])
                 ACMBaseLogger.info(info)
+                
+                let responseObject = try JSONDecoder().decode(T.self, from: data)
                 onSuccess?(responseObject)
             } catch let DecodingError.dataCorrupted(context) {
                 let message = ACMStringUtils.shared.merge(list: [
