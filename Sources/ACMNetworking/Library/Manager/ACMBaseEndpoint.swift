@@ -44,6 +44,10 @@ public struct ACMBaseEndpoint {
 
     var method: ACMBaseMethod = .get
 
+    // MARK: Stream
+
+    var stream: Bool? = false
+
     // MARK: Generated URL for making request
 
     var url: URL? {
@@ -107,7 +111,10 @@ public struct ACMBaseEndpoint {
         configuration.timeoutIntervalForRequest = config?.timeout ?? 0
         configuration.timeoutIntervalForResource = config?.timeout ?? 0
 
-        return URLSession(configuration: configuration, delegate: delegate, delegateQueue: OperationQueue.main)
+        let delegateQueue = OperationQueue()
+        delegateQueue.name = "ACMNetworking.operation.queue"
+
+        return URLSession(configuration: configuration, delegate: delegate, delegateQueue: delegateQueue)
     }
 
     init(config: ACMPlistModel? = nil, configOverride: Bool, host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: ACMAuthModel? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil) {

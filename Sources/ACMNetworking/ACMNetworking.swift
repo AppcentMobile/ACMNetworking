@@ -7,6 +7,7 @@ import Foundation
 /// ACMNetworking, make requests easily
 public class ACMNetworking: NSObject {
     private var task: URLSessionDataTask?
+    private var webSocketTask: URLSessionWebSocketTask?
 
     /// Public Init function
     /// For creating object with SDK
@@ -29,10 +30,7 @@ public class ACMNetworking: NSObject {
                                       onSuccess: ACMGenericCallbacks.ResponseCallback<T>,
                                       onError: ACMGenericCallbacks.ErrorCallback)
     {
-        guard let urlRequest = baseRequest(to: endpoint) else {
-            ACMBaseLogger.error(ACMNetworkConstants.urlRequestErrorMessage)
-            return
-        }
+        guard let urlRequest = generateURLRequest(endpoint: endpoint) else { return }
 
         task = endpoint.session(delegate: self).dataTask(with: urlRequest) { data, response, error in
             guard error == nil else {
@@ -96,7 +94,7 @@ public class ACMNetworking: NSObject {
                     ACMNetworkConstants.httpStatusError,
                     "-\(httpResponse.statusCode)",
                     ACMNetworkConstants.responseInfoMessage,
-                    String(data: data, encoding: .utf8) ?? ""
+                    String(data: data, encoding: .utf8) ?? "",
                 ])
                 ACMBaseLogger.error(message)
 
@@ -129,7 +127,7 @@ public class ACMNetworking: NSObject {
                     String(data: data, encoding: .utf8) ?? "",
                 ])
                 ACMBaseLogger.info(info)
-                
+
                 let responseObject = try JSONDecoder().decode(T.self, from: data)
                 onSuccess?(responseObject)
             } catch let DecodingError.dataCorrupted(context) {
@@ -164,9 +162,39 @@ public class ACMNetworking: NSObject {
         task?.resume()
     }
 
+    /// Stream request
+    ///
+    /// - Parameters:
+    ///     - endpoint: base endpoint that keeps all endpoint information
+    ///     - currentRetryCount(Optional): retry request count
+    ///     - onSuccess: Callback for success scenario
+    ///     - onError: Callback for error scenario
+    ///
+    /// - Returns:
+    ///     - Void
+    public func stream<T: Decodable>(to endpoint: ACMBaseEndpoint,
+                                     currentRetryCount: Int? = 0,
+                                     onSuccess: ACMGenericCallbacks.ResponseCallback<T>,
+                                     onError: ACMGenericCallbacks.ErrorCallback)
+    {
+        guard let urlRequest = generateURLRequest(endpoint: endpoint) else { return }
+        endpoint.session(delegate: self).st
+
+    }
+
     /// Cancels the current network request
     public func cancel() {
         task?.cancel()
         task = nil
+    }
+}
+
+private extension ACMNetworking {
+    func generateURLRequest(endpoint: ACMBaseEndpoint) -> URLRequest? {
+        guard var urlRequest = baseRequest(to: endpoint) else {
+            ACMBaseLogger.error(ACMNetworkConstants.urlRequestErrorMessage)
+            return nil
+        }
+        return urlRequest
     }
 }
