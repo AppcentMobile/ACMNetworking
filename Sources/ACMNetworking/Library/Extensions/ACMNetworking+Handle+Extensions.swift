@@ -18,6 +18,7 @@ extension ACMNetworking {
 }
 
 extension ACMNetworking {
+    /// Handle if error occures
     func handleNilErrorResponse(with endpoint: ACMBaseEndpoint, error: Error?, onError: ACMGenericCallbacks.ErrorCallback) {
         guard error == nil else {
             cancel()
@@ -33,6 +34,7 @@ extension ACMNetworking {
 }
 
 extension ACMNetworking {
+    /// Handle if response is nil
     func handleNilResponse(with endpoint: ACMBaseEndpoint, response: URLResponse?, onError: ACMGenericCallbacks.ErrorCallback) {
         guard response != nil else {
             cancel()
@@ -48,6 +50,7 @@ extension ACMNetworking {
 }
 
 extension ACMNetworking {
+    /// Handle some connectivity error occures
     func handleConnectivityError(with endpoint: ACMBaseEndpoint, error: Error?, onError: ACMGenericCallbacks.ErrorCallback) {
         if error?.isConnectivityError ?? false {
             cancel()
@@ -63,6 +66,7 @@ extension ACMNetworking {
 }
 
 extension ACMNetworking {
+    /// Handle response data
     func handleData(with endpoint: ACMBaseEndpoint, data: Data?, onError: ACMGenericCallbacks.ErrorCallback) -> Data? {
         guard let data = data else {
             cancel()
@@ -79,6 +83,7 @@ extension ACMNetworking {
 }
 
 extension ACMNetworking {
+    /// Handle http response
     func handleHttpResponse(with endpoint: ACMBaseEndpoint, response: URLResponse?, onError: ACMGenericCallbacks.ErrorCallback) -> HTTPURLResponse? {
         guard let httpResponse = response as? HTTPURLResponse else {
             cancel()
@@ -95,12 +100,14 @@ extension ACMNetworking {
 }
 
 extension ACMNetworking {
+    /// Validates response with http success statuses
     func validateResponse(with httpResponse: HTTPURLResponse) -> Bool {
         return 200 ..< 300 ~= httpResponse.statusCode
     }
 }
 
 extension ACMNetworking {
+    /// Execute retry mechanism
     func executeRetry<T: Decodable>(with endpoint: ACMBaseEndpoint, httpResponse: HTTPURLResponse, data: Data, currentRetryCount: Int?, onSuccess: ACMGenericCallbacks.ResponseCallback<T>, onError: ACMGenericCallbacks.ErrorCallback) {
         let message = ACMStringUtils.shared.merge(list: [
             ACMNetworkConstants.errorMessage,
@@ -132,6 +139,7 @@ extension ACMNetworking {
 }
 
 extension ACMNetworking {
+    /// Handle server response
     func handleResult<T: Decodable>(with endpoint: ACMBaseEndpoint, data: Data, onSuccess: ACMGenericCallbacks.ResponseCallback<T>, onError: ACMGenericCallbacks.ErrorCallback) {
         do {
             let info = ACMStringUtils.shared.merge(list: [
