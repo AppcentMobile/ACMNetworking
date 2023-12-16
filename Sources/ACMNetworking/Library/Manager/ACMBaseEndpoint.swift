@@ -128,7 +128,7 @@ public struct ACMBaseEndpoint {
         if let host = host {
             self.host = host
         } else {
-            self.host = self.config?.baseURL
+            self.host = self.config?.filteredBaseURL
         }
         self.scheme = scheme
         self.path = path

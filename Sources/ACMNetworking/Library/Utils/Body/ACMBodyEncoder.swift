@@ -19,14 +19,22 @@ final class ACMBodyEncoder {
             if ACMBodyEncoder.isNativeVariableType($1.value) {
                 $0[$1.key] = $1.value
             } else if ACMBodyEncoder.isVariableCodable($1.value) {
-                if let codable = $1.value as? Encodable {
-                    $0[$1.key] = codable.dictionary
-                } else {
-                    $0[$1.key] = ""
-                }
-            } else if ACMBodyEncoder.isVariableCodableArray($1.value) {
-                if let codableArray = $1.value as? [Encodable] {
-                    $0[$1.key] = codableArray.map { $0.dictionary }
+                if let item = $1.value as? Codable {
+                    if let dict = item.dictionary {
+                        $0[$1.key] = dict
+                    } else if let arrayOfCodable = $1.value as? [Codable] {
+                        $0[$1.key] = arrayOfCodable.map { $0.dictionary }
+                    } else {
+                        $0[$1.key] = ""
+                    }
+                } else if let item = $1.value as? Encodable {
+                    if let dict = item.dictionary {
+                        $0[$1.key] = dict
+                    } else if let arrayOfEncodable = $1.value as? [Encodable] {
+                        $0[$1.key] = arrayOfEncodable.map { $0.dictionary }
+                    } else {
+                        $0[$1.key] = ""
+                    }
                 } else {
                     $0[$1.key] = ""
                 }
@@ -48,19 +56,7 @@ final class ACMBodyEncoder {
     private static func isVariableCodable<T>(_ value: T) -> Bool {
         switch value {
         case is Codable,
-             is Encodable,
-             is Decodable:
-            return true
-        default:
-            return false
-        }
-    }
-
-    private static func isVariableCodableArray<T>(_ value: T) -> Bool {
-        switch value {
-        case is [Codable],
-             is [Encodable],
-             is [Decodable]:
+             is Encodable:
             return true
         default:
             return false
