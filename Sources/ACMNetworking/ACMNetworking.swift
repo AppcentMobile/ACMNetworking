@@ -41,34 +41,9 @@ public class ACMNetworking: NSObject {
             guard let data = self.handleData(with: endpoint, data: data, onError: onError) else { return }
             guard let httpResponse = self.handleResponse(with: endpoint, response: response, onError: onError) else { return }
 
-            guard 200 ..< 300 ~= httpResponse.statusCode else {
-                let message = ACMStringUtils.shared.merge(list: [
-                    ACMNetworkConstants.errorMessage,
-                    ACMNetworkConstants.httpStatusError,
-                    "-\(httpResponse.statusCode)",
-                    ACMNetworkConstants.responseInfoMessage,
-                    String(data: data, encoding: .utf8) ?? "",
-                ])
-                ACMBaseLogger.error(message)
-
-                // MARK: Retry mechanism
-
-                guard let maxRetryCount = endpoint.retryCount else {
-                    onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.httpStatusError, endpoint: endpoint))
-                    self.cancel()
-                    return
-                }
-
-                if let currentRetryCount = currentRetryCount, currentRetryCount < maxRetryCount {
-                    let nextRetryCount = currentRetryCount + 1
-                    ACMBaseLogger.info(ACMStringUtils.shared.merge(list: [
-                        String(format: ACMNetworkConstants.httpRetryCount, nextRetryCount, maxRetryCount),
-                    ]))
-                    self.request(to: endpoint, currentRetryCount: nextRetryCount, onSuccess: onSuccess, onError: onError)
-                } else {
-                    self.cancel()
-                }
-
+            // Check if response is in valid http range
+            guard self.validateResponse(with: httpResponse) else {
+                self.executeRetry(with: endpoint, httpResponse: httpResponse, data: data, currentRetryCount: currentRetryCount, onSuccess: onSuccess, onError: onError)
                 return
             }
 
@@ -238,5 +213,42 @@ private extension ACMNetworking {
             return nil
         }
         return httpResponse
+    }
+}
+
+private extension ACMNetworking {
+    func validateResponse(with httpResponse: HTTPURLResponse) -> Bool {
+        return 200 ..< 300 ~= httpResponse.statusCode
+    }
+}
+
+private extension ACMNetworking {
+    func executeRetry<T: Decodable>(with endpoint: ACMBaseEndpoint, httpResponse: HTTPURLResponse, data: Data, currentRetryCount: Int?, onSuccess: ACMGenericCallbacks.ResponseCallback<T>, onError: ACMGenericCallbacks.ErrorCallback) {
+        let message = ACMStringUtils.shared.merge(list: [
+            ACMNetworkConstants.errorMessage,
+            ACMNetworkConstants.httpStatusError,
+            "-\(httpResponse.statusCode)",
+            ACMNetworkConstants.responseInfoMessage,
+            String(data: data, encoding: .utf8) ?? "",
+        ])
+        ACMBaseLogger.error(message)
+
+        // MARK: Retry mechanism
+
+        guard let maxRetryCount = endpoint.retryCount else {
+            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.httpStatusError, endpoint: endpoint))
+            cancel()
+            return
+        }
+
+        if let currentRetryCount = currentRetryCount, currentRetryCount < maxRetryCount {
+            let nextRetryCount = currentRetryCount + 1
+            ACMBaseLogger.info(ACMStringUtils.shared.merge(list: [
+                String(format: ACMNetworkConstants.httpRetryCount, nextRetryCount, maxRetryCount),
+            ]))
+            request(to: endpoint, currentRetryCount: nextRetryCount, onSuccess: onSuccess, onError: onError)
+        } else {
+            cancel()
+        }
     }
 }
