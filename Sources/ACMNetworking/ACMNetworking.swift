@@ -7,7 +7,6 @@ import Foundation
 /// ACMNetworking, make requests easily
 public class ACMNetworking: NSObject {
     private var task: URLSessionDataTask?
-    private var webSocketTask: URLSessionWebSocketTask?
 
     /// Public Init function
     /// For creating object with SDK
@@ -32,61 +31,15 @@ public class ACMNetworking: NSObject {
     {
         guard let urlRequest = generateURLRequest(endpoint: endpoint) else { return }
 
-        task = endpoint.session(delegate: self).dataTask(with: urlRequest) { data, response, error in
-            guard error == nil else {
-                self.cancel()
-                let message = ACMStringUtils.shared.merge(list: [
-                    ACMNetworkConstants.errorMessage,
-                    error?.localizedDescription ?? "",
-                ])
-                ACMBaseLogger.error(message)
-                onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: error?.localizedDescription, endpoint: endpoint))
-                return
-            }
+        task = endpoint.session(delegate: self).dataTask(with: urlRequest) { [weak self] data, response, error in
+            guard let self else { return }
 
-            guard response != nil else {
-                self.cancel()
-                let message = ACMStringUtils.shared.merge(list: [
-                    ACMNetworkConstants.errorMessage,
-                    ACMNetworkConstants.responseNullMessage,
-                ])
-                ACMBaseLogger.error(message)
-                onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.responseNullMessage, endpoint: endpoint))
-                return
-            }
+            self.handleNilErrorResponse(with: endpoint, error: error, onError: onError)
+            self.handleNilResponse(with: endpoint, response: response, onError: onError)
+            self.handleConnectivityError(with: endpoint, error: error, onError: onError)
 
-            guard let data = data else {
-                self.cancel()
-                let message = ACMStringUtils.shared.merge(list: [
-                    ACMNetworkConstants.errorMessage,
-                    ACMNetworkConstants.dataNullMessage,
-                ])
-                ACMBaseLogger.error(message)
-                onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.dataNullMessage, endpoint: endpoint))
-                return
-            }
-
-            if error?.isConnectivityError ?? false {
-                self.cancel()
-                let message = ACMStringUtils.shared.merge(list: [
-                    ACMNetworkConstants.errorMessage,
-                    ACMNetworkConstants.dataNullMessage,
-                ])
-                ACMBaseLogger.error(message)
-                onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.dataNullMessage, endpoint: endpoint))
-                return
-            }
-
-            guard let httpResponse = response as? HTTPURLResponse else {
-                self.cancel()
-                let message = ACMStringUtils.shared.merge(list: [
-                    ACMNetworkConstants.errorMessage,
-                    ACMNetworkConstants.httpStatusError,
-                ])
-                ACMBaseLogger.error(message)
-                onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.httpStatusError, endpoint: endpoint))
-                return
-            }
+            guard let data = self.handleData(with: endpoint, data: data, onError: onError) else { return }
+            guard let httpResponse = self.handleResponse(with: endpoint, response: response, onError: onError) else { return }
 
             guard 200 ..< 300 ~= httpResponse.statusCode else {
                 let message = ACMStringUtils.shared.merge(list: [
@@ -173,13 +126,25 @@ public class ACMNetworking: NSObject {
     /// - Returns:
     ///     - Void
     public func stream<T: Decodable>(to endpoint: ACMBaseEndpoint,
-                                     currentRetryCount: Int? = 0,
-                                     onSuccess: ACMGenericCallbacks.ResponseCallback<T>,
+                                     currentRetryCount _: Int? = 0,
+                                     onSuccess _: ACMGenericCallbacks.ResponseCallback<T>,
                                      onError: ACMGenericCallbacks.ErrorCallback)
     {
         guard let urlRequest = generateURLRequest(endpoint: endpoint) else { return }
-        endpoint.session(delegate: self).st
 
+        let task = endpoint.session(delegate: self).dataTask(with: urlRequest, completionHandler: { _, _, error in
+            guard error == nil else {
+                self.cancel()
+                let message = ACMStringUtils.shared.merge(list: [
+                    ACMNetworkConstants.errorMessage,
+                    error?.localizedDescription ?? "",
+                ])
+                ACMBaseLogger.error(message)
+                onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: error?.localizedDescription, endpoint: endpoint))
+                return
+            }
+        })
+        task.resume()
     }
 
     /// Cancels the current network request
@@ -196,5 +161,82 @@ private extension ACMNetworking {
             return nil
         }
         return urlRequest
+    }
+}
+
+private extension ACMNetworking {
+    func handleNilErrorResponse(with endpoint: ACMBaseEndpoint, error: Error?, onError: ACMGenericCallbacks.ErrorCallback) {
+        guard error == nil else {
+            cancel()
+            let message = ACMStringUtils.shared.merge(list: [
+                ACMNetworkConstants.errorMessage,
+                error?.localizedDescription ?? "",
+            ])
+            ACMBaseLogger.error(message)
+            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: error?.localizedDescription, endpoint: endpoint))
+            return
+        }
+    }
+}
+
+private extension ACMNetworking {
+    func handleNilResponse(with endpoint: ACMBaseEndpoint, response: URLResponse?, onError: ACMGenericCallbacks.ErrorCallback) {
+        guard response != nil else {
+            cancel()
+            let message = ACMStringUtils.shared.merge(list: [
+                ACMNetworkConstants.errorMessage,
+                ACMNetworkConstants.responseNullMessage,
+            ])
+            ACMBaseLogger.error(message)
+            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.responseNullMessage, endpoint: endpoint))
+            return
+        }
+    }
+}
+
+private extension ACMNetworking {
+    func handleConnectivityError(with endpoint: ACMBaseEndpoint, error: Error?, onError: ACMGenericCallbacks.ErrorCallback) {
+        if error?.isConnectivityError ?? false {
+            cancel()
+            let message = ACMStringUtils.shared.merge(list: [
+                ACMNetworkConstants.errorMessage,
+                ACMNetworkConstants.dataNullMessage,
+            ])
+            ACMBaseLogger.error(message)
+            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.dataNullMessage, endpoint: endpoint))
+            return
+        }
+    }
+}
+
+private extension ACMNetworking {
+    func handleData(with endpoint: ACMBaseEndpoint, data: Data?, onError: ACMGenericCallbacks.ErrorCallback) -> Data? {
+        guard let data = data else {
+            cancel()
+            let message = ACMStringUtils.shared.merge(list: [
+                ACMNetworkConstants.errorMessage,
+                ACMNetworkConstants.dataNullMessage,
+            ])
+            ACMBaseLogger.error(message)
+            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.dataNullMessage, endpoint: endpoint))
+            return nil
+        }
+        return data
+    }
+}
+
+private extension ACMNetworking {
+    func handleResponse(with endpoint: ACMBaseEndpoint, response: URLResponse?, onError: ACMGenericCallbacks.ErrorCallback) -> HTTPURLResponse? {
+        guard let httpResponse = response as? HTTPURLResponse else {
+            cancel()
+            let message = ACMStringUtils.shared.merge(list: [
+                ACMNetworkConstants.errorMessage,
+                ACMNetworkConstants.httpStatusError,
+            ])
+            ACMBaseLogger.error(message)
+            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.httpStatusError, endpoint: endpoint))
+            return nil
+        }
+        return httpResponse
     }
 }
