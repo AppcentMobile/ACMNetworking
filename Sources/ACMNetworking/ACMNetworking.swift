@@ -39,7 +39,7 @@ public class ACMNetworking: NSObject {
             self.handleConnectivityError(with: endpoint, error: error, onError: onError)
 
             guard let data = self.handleData(with: endpoint, data: data, onError: onError) else { return }
-            guard let httpResponse = self.handleResponse(with: endpoint, response: response, onError: onError) else { return }
+            guard let httpResponse = self.handleHttpResponse(with: endpoint, response: response, onError: onError) else { return }
 
             // Check if response is in valid http range
             guard self.validateResponse(with: httpResponse) else {
@@ -49,43 +49,7 @@ public class ACMNetworking: NSObject {
 
             self.cancel()
 
-            do {
-                let info = ACMStringUtils.shared.merge(list: [
-                    ACMNetworkConstants.responseInfoMessage,
-                    String(data: data, encoding: .utf8) ?? "",
-                ])
-                ACMBaseLogger.info(info)
-
-                let responseObject = try JSONDecoder().decode(T.self, from: data)
-                onSuccess?(responseObject)
-            } catch let DecodingError.dataCorrupted(context) {
-                let message = ACMStringUtils.shared.merge(list: [
-                    context.debugDescription,
-                ])
-                ACMBaseLogger.error(message)
-            } catch let DecodingError.keyNotFound(key, context) {
-                let message = ACMStringUtils.shared.merge(list: [
-                    "Key \(key) not found: \(context.debugDescription)",
-                    "codingPath: \(context.codingPath)",
-                ])
-                ACMBaseLogger.error(message)
-            } catch let DecodingError.valueNotFound(value, context) {
-                let message = ACMStringUtils.shared.merge(list: [
-                    "Value \(value) not found: \(context.debugDescription)",
-                    "codingPath: \(context.codingPath)",
-                ])
-                ACMBaseLogger.error(message)
-            } catch let DecodingError.typeMismatch(type, context) {
-                let message = ACMStringUtils.shared.merge(list: [
-                    "Type \(type) mismatch: \(context.debugDescription)",
-                    "codingPath: \(context.codingPath)",
-                ])
-                ACMBaseLogger.error(message)
-            } catch let e {
-                let errorMessage = String(format: ACMNetworkConstants.dataParseErrorMessage, e.localizedDescription)
-                ACMBaseLogger.warning(errorMessage)
-                onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: errorMessage, endpoint: endpoint))
-            }
+            self.handleResult(with: endpoint, data: data, onSuccess: onSuccess, onError: onError)
         }
         task?.resume()
     }
@@ -126,129 +90,5 @@ public class ACMNetworking: NSObject {
     public func cancel() {
         task?.cancel()
         task = nil
-    }
-}
-
-private extension ACMNetworking {
-    func generateURLRequest(endpoint: ACMBaseEndpoint) -> URLRequest? {
-        guard var urlRequest = baseRequest(to: endpoint) else {
-            ACMBaseLogger.error(ACMNetworkConstants.urlRequestErrorMessage)
-            return nil
-        }
-        return urlRequest
-    }
-}
-
-private extension ACMNetworking {
-    func handleNilErrorResponse(with endpoint: ACMBaseEndpoint, error: Error?, onError: ACMGenericCallbacks.ErrorCallback) {
-        guard error == nil else {
-            cancel()
-            let message = ACMStringUtils.shared.merge(list: [
-                ACMNetworkConstants.errorMessage,
-                error?.localizedDescription ?? "",
-            ])
-            ACMBaseLogger.error(message)
-            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: error?.localizedDescription, endpoint: endpoint))
-            return
-        }
-    }
-}
-
-private extension ACMNetworking {
-    func handleNilResponse(with endpoint: ACMBaseEndpoint, response: URLResponse?, onError: ACMGenericCallbacks.ErrorCallback) {
-        guard response != nil else {
-            cancel()
-            let message = ACMStringUtils.shared.merge(list: [
-                ACMNetworkConstants.errorMessage,
-                ACMNetworkConstants.responseNullMessage,
-            ])
-            ACMBaseLogger.error(message)
-            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.responseNullMessage, endpoint: endpoint))
-            return
-        }
-    }
-}
-
-private extension ACMNetworking {
-    func handleConnectivityError(with endpoint: ACMBaseEndpoint, error: Error?, onError: ACMGenericCallbacks.ErrorCallback) {
-        if error?.isConnectivityError ?? false {
-            cancel()
-            let message = ACMStringUtils.shared.merge(list: [
-                ACMNetworkConstants.errorMessage,
-                ACMNetworkConstants.dataNullMessage,
-            ])
-            ACMBaseLogger.error(message)
-            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.dataNullMessage, endpoint: endpoint))
-            return
-        }
-    }
-}
-
-private extension ACMNetworking {
-    func handleData(with endpoint: ACMBaseEndpoint, data: Data?, onError: ACMGenericCallbacks.ErrorCallback) -> Data? {
-        guard let data = data else {
-            cancel()
-            let message = ACMStringUtils.shared.merge(list: [
-                ACMNetworkConstants.errorMessage,
-                ACMNetworkConstants.dataNullMessage,
-            ])
-            ACMBaseLogger.error(message)
-            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.dataNullMessage, endpoint: endpoint))
-            return nil
-        }
-        return data
-    }
-}
-
-private extension ACMNetworking {
-    func handleResponse(with endpoint: ACMBaseEndpoint, response: URLResponse?, onError: ACMGenericCallbacks.ErrorCallback) -> HTTPURLResponse? {
-        guard let httpResponse = response as? HTTPURLResponse else {
-            cancel()
-            let message = ACMStringUtils.shared.merge(list: [
-                ACMNetworkConstants.errorMessage,
-                ACMNetworkConstants.httpStatusError,
-            ])
-            ACMBaseLogger.error(message)
-            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.httpStatusError, endpoint: endpoint))
-            return nil
-        }
-        return httpResponse
-    }
-}
-
-private extension ACMNetworking {
-    func validateResponse(with httpResponse: HTTPURLResponse) -> Bool {
-        return 200 ..< 300 ~= httpResponse.statusCode
-    }
-}
-
-private extension ACMNetworking {
-    func executeRetry<T: Decodable>(with endpoint: ACMBaseEndpoint, httpResponse: HTTPURLResponse, data: Data, currentRetryCount: Int?, onSuccess: ACMGenericCallbacks.ResponseCallback<T>, onError: ACMGenericCallbacks.ErrorCallback) {
-        let message = ACMStringUtils.shared.merge(list: [
-            ACMNetworkConstants.errorMessage,
-            ACMNetworkConstants.httpStatusError,
-            "-\(httpResponse.statusCode)",
-            ACMNetworkConstants.responseInfoMessage,
-            String(data: data, encoding: .utf8) ?? "",
-        ])
-        ACMBaseLogger.error(message)
-
-        // MARK: Retry mechanism
-
-        guard let maxRetryCount = endpoint.retryCount else {
-            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.httpStatusError, endpoint: endpoint))
-            cancel()
-            return
-        }
-
-        if let currentRetryCount = currentRetryCount, currentRetryCount < maxRetryCount {
-            let nextRetryCount = currentRetryCount + 1
-            ACMBaseLogger.info(ACMStringUtils.shared.merge(list: [
-                String(format: ACMNetworkConstants.httpRetryCount, nextRetryCount, maxRetryCount),
-            ]))
-            request(to: endpoint, currentRetryCount: nextRetryCount, onSuccess: onSuccess, onError: onError)
-        } else {
-            cancel()
-        }
     }
 }
