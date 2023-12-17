@@ -10,6 +10,12 @@ open class ACMPlistModel: Codable {
     var timeout: Double
     var isLogEnabled: Bool
 
+    var filteredBaseURL: String {
+        return baseURL.replacingOccurrences(of: "http://", with: "")
+            .replacingOccurrences(of: "https://", with: "")
+            .replacingOccurrences(of: "www", with: "")
+    }
+
     enum CodingKeys: CodingKey {
         case baseURL
         case timeout

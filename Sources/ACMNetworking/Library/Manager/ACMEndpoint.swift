@@ -28,6 +28,7 @@ public final class ACMEndpoint {
     var authHeader: ACMAuthModel?
     var mediaData: NSMutableData?
     var retryCount: Int?
+    var isStream: Bool = false
 
     /// Set config model
     ///
@@ -111,6 +112,18 @@ public final class ACMEndpoint {
     ///     - Self
     public func set(method: ACMBaseMethod) -> Self {
         self.method = method
+        return self
+    }
+
+    /// Sets stream response support enabled
+    ///
+    /// - Parameters:
+    ///     - method: Given method with model object
+    ///
+    /// - Returns
+    ///     - Self
+    public func set(isStream: Bool) -> Self {
+        self.isStream = isStream
         return self
     }
 
@@ -313,6 +326,10 @@ public final class ACMEndpoint {
     /// - Returns
     ///     - Self
     public func build() -> ACMBaseEndpoint {
-        return ACMBaseEndpoint(config: config, configOverride: configOverride, host: host, scheme: scheme, path: path, queryItems: queryItems, params: params, headers: headers, method: method, authHeader: authHeader, mediaData: mediaData, retryCount: retryCount)
+        let hasStreamEnabledAsParam = paramsModel?.first(where: { $0.key == "stream" && ($0.value as? Bool) == true }) != nil
+
+        let streamSupported = isStream || hasStreamEnabledAsParam
+
+        return ACMBaseEndpoint(config: config, configOverride: configOverride, host: host, scheme: scheme, path: path, queryItems: queryItems, params: params, headers: headers, method: method, authHeader: authHeader, mediaData: mediaData, retryCount: retryCount, isStream: streamSupported)
     }
 }

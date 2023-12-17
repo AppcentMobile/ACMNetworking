@@ -67,6 +67,10 @@ public struct ACMBaseEndpoint {
 
     var mediaData: NSMutableData?
 
+    // MARK: Is request stream supported
+
+    var isStream: Bool
+
     // MARK: Generated url request
 
     var urlRequest: URLRequest? {
@@ -107,10 +111,13 @@ public struct ACMBaseEndpoint {
         configuration.timeoutIntervalForRequest = config?.timeout ?? 0
         configuration.timeoutIntervalForResource = config?.timeout ?? 0
 
-        return URLSession(configuration: configuration, delegate: delegate, delegateQueue: OperationQueue.main)
+        let delegateQueue = OperationQueue()
+        delegateQueue.name = "ACMNetworking.operation.queue"
+
+        return URLSession(configuration: configuration, delegate: delegate, delegateQueue: delegateQueue)
     }
 
-    init(config: ACMPlistModel? = nil, configOverride: Bool, host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: ACMAuthModel? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil) {
+    init(config: ACMPlistModel? = nil, configOverride: Bool, host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: ACMAuthModel? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil, isStream: Bool = false) {
         if let config = config {
             self.config = config
         } else {
@@ -121,7 +128,7 @@ public struct ACMBaseEndpoint {
         if let host = host {
             self.host = host
         } else {
-            self.host = self.config?.baseURL
+            self.host = self.config?.filteredBaseURL
         }
         self.scheme = scheme
         self.path = path
@@ -132,6 +139,7 @@ public struct ACMBaseEndpoint {
         self.authHeader = authHeader
         self.mediaData = mediaData
         self.retryCount = retryCount
+        self.isStream = isStream
     }
 }
 
