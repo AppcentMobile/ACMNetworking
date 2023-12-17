@@ -44,10 +44,6 @@ public struct ACMBaseEndpoint {
 
     var method: ACMBaseMethod = .get
 
-    // MARK: Stream
-
-    var stream: Bool? = false
-
     // MARK: Generated URL for making request
 
     var url: URL? {
@@ -70,6 +66,10 @@ public struct ACMBaseEndpoint {
     // MARK: Data for media upload
 
     var mediaData: NSMutableData?
+
+    // MARK: Is request stream supported
+
+    var isStream: Bool
 
     // MARK: Generated url request
 
@@ -117,7 +117,7 @@ public struct ACMBaseEndpoint {
         return URLSession(configuration: configuration, delegate: delegate, delegateQueue: delegateQueue)
     }
 
-    init(config: ACMPlistModel? = nil, configOverride: Bool, host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: ACMAuthModel? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil) {
+    init(config: ACMPlistModel? = nil, configOverride: Bool, host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: ACMAuthModel? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil, isStream: Bool = false) {
         if let config = config {
             self.config = config
         } else {
@@ -139,6 +139,7 @@ public struct ACMBaseEndpoint {
         self.authHeader = authHeader
         self.mediaData = mediaData
         self.retryCount = retryCount
+        self.isStream = isStream
     }
 }
 

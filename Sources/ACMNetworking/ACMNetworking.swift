@@ -54,38 +54,6 @@ public class ACMNetworking: NSObject {
         task?.resume()
     }
 
-    /// Stream request
-    ///
-    /// - Parameters:
-    ///     - endpoint: base endpoint that keeps all endpoint information
-    ///     - currentRetryCount(Optional): retry request count
-    ///     - onSuccess: Callback for success scenario
-    ///     - onError: Callback for error scenario
-    ///
-    /// - Returns:
-    ///     - Void
-    public func stream<T: Decodable>(to endpoint: ACMBaseEndpoint,
-                                     currentRetryCount _: Int? = 0,
-                                     onSuccess _: ACMGenericCallbacks.ResponseCallback<T>,
-                                     onError: ACMGenericCallbacks.ErrorCallback)
-    {
-        guard let urlRequest = generateURLRequest(endpoint: endpoint) else { return }
-
-        let task = endpoint.session(delegate: self).dataTask(with: urlRequest, completionHandler: { _, _, error in
-            guard error == nil else {
-                self.cancel()
-                let message = ACMStringUtils.shared.merge(list: [
-                    ACMNetworkConstants.errorMessage,
-                    error?.localizedDescription ?? "",
-                ])
-                ACMBaseLogger.error(message)
-                onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: error?.localizedDescription, endpoint: endpoint))
-                return
-            }
-        })
-        task.resume()
-    }
-
     /// Cancels the current network request
     public func cancel() {
         task?.cancel()

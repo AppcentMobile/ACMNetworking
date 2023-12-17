@@ -142,14 +142,32 @@ extension ACMNetworking {
     /// Handle server response
     func handleResult<T: Decodable>(with endpoint: ACMBaseEndpoint, data: Data, onSuccess: ACMGenericCallbacks.ResponseCallback<T>, onError: ACMGenericCallbacks.ErrorCallback) {
         do {
+            let dataString = String(data: data, encoding: .utf8) ?? ""
             let info = ACMStringUtils.shared.merge(list: [
                 ACMNetworkConstants.responseInfoMessage,
-                String(data: data, encoding: .utf8) ?? "",
+                dataString,
             ])
             ACMBaseLogger.info(info)
 
-            let responseObject = try JSONDecoder().decode(T.self, from: data)
-            onSuccess?(responseObject)
+            if endpoint.isStream == true {
+                let components = dataString
+                    .components(separatedBy: "\n").filter { !$0.replacingOccurrences(of: " ", with: "").isEmpty }
+                    .map { $0.replacingOccurrences(of: "data:", with: "")
+                        .replacingOccurrences(of: " ", with: "")
+                    }
+                    .filter { !$0.contains("DONE") }
+                    .joined(separator: ",")
+
+                let componentMerged = String(format: "[%@]", components)
+
+                if let data = componentMerged.toData {
+                    let responseObject = try JSONDecoder().decode(T.self, from: data)
+                    onSuccess?(responseObject)
+                }
+            } else {
+                let responseObject = try JSONDecoder().decode(T.self, from: data)
+                onSuccess?(responseObject)
+            }
         } catch let DecodingError.dataCorrupted(context) {
             let message = ACMStringUtils.shared.merge(list: [
                 context.debugDescription,
