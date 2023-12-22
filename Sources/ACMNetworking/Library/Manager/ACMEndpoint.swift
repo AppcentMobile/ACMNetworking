@@ -29,6 +29,7 @@ public final class ACMEndpoint {
     var mediaData: NSMutableData?
     var retryCount: Int?
     var isStream: Bool = false
+    var downloadURL: String?
 
     /// Set config model
     ///
@@ -100,6 +101,18 @@ public final class ACMEndpoint {
     public func set(path: ACMPathModel) -> Self {
         let pathQuery = [path.path, path.value].joined(separator: "/")
         self.path = pathQuery
+        return self
+    }
+
+    /// Sets the raw url string
+    ///
+    /// - Parameters:
+    ///     - rawURL: Given url string
+    ///
+    /// - Returns
+    ///     - Self
+    public func set(downloadURL: String) -> Self {
+        self.downloadURL = downloadURL
         return self
     }
 
@@ -330,6 +343,6 @@ public final class ACMEndpoint {
 
         let streamSupported = isStream || hasStreamEnabledAsParam
 
-        return ACMBaseEndpoint(config: config, configOverride: configOverride, host: host, scheme: scheme, path: path, queryItems: queryItems, params: params, headers: headers, method: method, authHeader: authHeader, mediaData: mediaData, retryCount: retryCount, isStream: streamSupported)
+        return ACMBaseEndpoint(config: config, configOverride: configOverride, host: host, scheme: scheme, path: path, queryItems: queryItems, params: params, headers: headers, method: method, authHeader: authHeader, mediaData: mediaData, retryCount: retryCount, isStream: streamSupported, downloadURL: downloadURL)
     }
 }
