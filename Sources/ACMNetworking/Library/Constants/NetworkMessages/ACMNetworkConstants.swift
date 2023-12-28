@@ -54,12 +54,12 @@ public extension ACMNetworkConstants {
     }
 
     /// Header for holding multipart header with content type
-    static func multipartHeader(model: ACMMultipartContentTypeModel) -> ACMHeaderModel {
-        ACMHeaderModel(field: "Content-Type", value: ACMStringUtils.shared.merge(list: [
+    static func multipartHeader(model: ACMMultipartContentTypeModel, utils: ACMStringUtils?) -> ACMHeaderModel {
+        ACMHeaderModel(field: "Content-Type", value: utils?.merge(list: [
             model.type,
             " ",
             model.boundary,
-        ]))
+        ]) ?? "")
     }
 
     /// Header for holding multipart accept type

@@ -13,6 +13,7 @@ public final class ACMEndpoint {
     /// Init method for creating new object
     public init() {}
 
+    var mainEndpoint: ACMBaseEndpoint?
     var config: ACMPlistModel?
     var configOverride: Bool = false
     var host: String?
@@ -275,13 +276,13 @@ public final class ACMEndpoint {
         let contentType = ACMNetworkConstants.multipartContentType
         let boundary = contentType.boundary
         let fileModel = fileData?.fileModel
-        let fileName = ACMStringUtils.shared.merge(list: [
+        let fileName = mainEndpoint?.stringUtils?.merge(list: [
             ProcessInfo.processInfo.globallyUniqueString,
             fileModel?.ext ?? "",
-        ])
+        ]) ?? ""
 
         let endpoint = set(method: .post)
-            .add(header: ACMNetworkConstants.multipartHeader(model: contentType))
+            .add(header: ACMNetworkConstants.multipartHeader(model: contentType, utils: mainEndpoint?.stringUtils))
             .add(header: ACMNetworkConstants.multipartDataAccept)
 
         let body = NSMutableData()
@@ -302,13 +303,13 @@ public final class ACMEndpoint {
                 " \($0.key)=\($0.value);"
             }.joined(separator: "")
 
-            let contentDisposition = ACMStringUtils.shared.merge(list: [
+            let contentDisposition = mainEndpoint?.stringUtils?.merge(list: [
                 "Content-Disposition: form-data;",
                 paramsRaw,
                 "\r\n",
             ])
 
-            if let data = contentDisposition.toData {
+            if let data = contentDisposition?.toData {
                 body.append(data)
             }
         }
@@ -343,6 +344,8 @@ public final class ACMEndpoint {
 
         let streamSupported = isStream || hasStreamEnabledAsParam
 
-        return ACMBaseEndpoint(config: config, configOverride: configOverride, host: host, scheme: scheme, path: path, queryItems: queryItems, params: params, headers: headers, method: method, authHeader: authHeader, mediaData: mediaData, retryCount: retryCount, isStream: streamSupported, downloadURL: downloadURL)
+        mainEndpoint = ACMBaseEndpoint(config: config, configOverride: configOverride, host: host, scheme: scheme, path: path, queryItems: queryItems, params: params, headers: headers, method: method, authHeader: authHeader, mediaData: mediaData, retryCount: retryCount, isStream: streamSupported, downloadURL: downloadURL)
+
+        return mainEndpoint ?? ACMBaseEndpoint()
     }
 }

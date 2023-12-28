@@ -21,11 +21,16 @@ public extension ACMNetworking {
     func request<T: Decodable>(to endpoint: ACMBaseEndpoint,
                                currentRetryCount: Int? = 0,
                                onSuccess: ACMGenericCallbacks.ResponseCallback<T>,
-                               onError: ACMGenericCallbacks.ErrorCallback)
+                               onProgress: ACMGenericCallbacks.ProgressCallback = nil,
+                               onError: ACMGenericCallbacks.ErrorCallback = nil)
     {
         guard let urlRequest = generateURLRequest(endpoint: endpoint) else { return }
 
-        requestTask = endpoint.session(delegate: self).dataTask(with: urlRequest) { [weak self] data, response, error in
+        mainEndpoint = endpoint
+
+        session = mainEndpoint?.session(delegate: self)
+
+        requestTask = session?.dataTask(with: urlRequest) { [weak self] data, response, error in
             guard let self else { return }
 
             self.handleNilErrorResponse(with: endpoint, error: error, onError: onError)
@@ -45,6 +50,12 @@ public extension ACMNetworking {
 
             self.handleResult(with: endpoint, data: data, onSuccess: onSuccess, onError: onError)
         }
+
+        taskProgress = requestTask?.progress.observe(\.fractionCompleted, changeHandler: { progress, _ in
+            let model = ACMProgressModel(progress: progress.fractionCompleted)
+            onProgress?(model)
+        })
+
         requestTask?.resume()
     }
 }

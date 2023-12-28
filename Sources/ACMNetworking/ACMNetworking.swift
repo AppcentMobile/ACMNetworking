@@ -6,9 +6,20 @@ import Foundation
 
 /// ACMNetworking, make requests easily
 public class ACMNetworking: NSObject {
+    var mainEndpoint: ACMBaseEndpoint?
+    var session: URLSession?
     var requestTask: URLSessionDataTask?
     var downloadTask: URLSessionDownloadTask?
     var taskProgress: NSKeyValueObservation?
+
+    /// Predefined variables
+    var logger: ACMBaseLogger? {
+        mainEndpoint?.logger
+    }
+
+    var stringUtils: ACMStringUtils? {
+        mainEndpoint?.stringUtils
+    }
 
     /// Public Init function
     /// For creating object with SDK
@@ -16,10 +27,20 @@ public class ACMNetworking: NSObject {
         super.init()
     }
 
+    /// Public destroy function
+    deinit {
+        print("ACMNetworking deinited")
+    }
+
     /// Cancels the current network request
     public func cancel() {
         cancelRequestTask()
         cancelDownloadTask()
+        session?.invalidateAndCancel()
+        session = nil
+        taskProgress?.invalidate()
+        taskProgress = nil
+        mainEndpoint = nil
     }
 
     private func cancelRequestTask() {

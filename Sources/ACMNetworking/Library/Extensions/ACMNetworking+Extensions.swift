@@ -7,60 +7,65 @@ import Foundation
 extension ACMNetworking {
     func baseRequest(to endpoint: ACMBaseEndpoint) -> URLRequest? {
         guard let urlRequest = endpoint.urlRequest else {
-            ACMBaseLogger.error(ACMNetworkConstants.urlRequestErrorMessage)
+            endpoint.logger?.error(ACMNetworkConstants.urlRequestErrorMessage)
             return nil
         }
 
-        let info = ACMStringUtils.shared.merge(list: [
+        var infoList = [
             ACMNetworkConstants.httpRequestType,
-            endpoint.method.rawValue,
-        ])
-        ACMBaseLogger.info(info)
+        ]
+
+        if let methodRaw = endpoint.method?.rawValue {
+            infoList.append(methodRaw)
+        }
+
+        let info = endpoint.stringUtils?.merge(list: infoList)
+        endpoint.logger?.info(info)
 
         if let url = endpoint.url {
-            let info = ACMStringUtils.shared.merge(list: [
+            let info = endpoint.stringUtils?.merge(list: [
                 ACMNetworkConstants.httpURLMessage,
                 "\(url)",
             ])
-            ACMBaseLogger.info(info)
+            endpoint.logger?.info(info)
         }
 
         if let authHeader = endpoint.authHeader {
-            let info = ACMStringUtils.shared.merge(list: [
+            let info = endpoint.stringUtils?.merge(list: [
                 ACMNetworkConstants.httpAuthHeadersMessage,
                 "\(authHeader)",
             ])
-            ACMBaseLogger.info(info)
+            endpoint.logger?.info(info)
         }
 
         if let headers = endpoint.headers, headers.count > 0 {
-            let info = ACMStringUtils.shared.merge(list: [
+            let info = endpoint.stringUtils?.merge(list: [
                 ACMNetworkConstants.httpHeadersMessage,
                 "\(headers)",
             ])
-            ACMBaseLogger.info(info)
+            endpoint.logger?.info(info)
         }
 
         if let queryItems = endpoint.queryItems, queryItems.count > 0 {
-            let info = ACMStringUtils.shared.merge(list: [
+            let info = endpoint.stringUtils?.merge(list: [
                 ACMNetworkConstants.httpQueryItemsMessage,
                 "\(queryItems)",
             ])
-            ACMBaseLogger.info(info)
+            endpoint.logger?.info(info)
         }
 
         if let params = endpoint.params {
-            let info = ACMStringUtils.shared.merge(list: [
+            let info = endpoint.stringUtils?.merge(list: [
                 ACMNetworkConstants.httpBodyMessage,
                 params.paramsRaw,
             ])
-            ACMBaseLogger.info(info)
+            endpoint.logger?.info(info)
         } else if let data = endpoint.mediaData {
-            let info = ACMStringUtils.shared.merge(list: [
+            let info = endpoint.stringUtils?.merge(list: [
                 ACMNetworkConstants.httpBodyMessage,
                 String(format: ACMNetworkConstants.httpBodyMultipart, "\(data.length)"),
             ])
-            ACMBaseLogger.info(info)
+            endpoint.logger?.info(info)
         }
 
         return urlRequest
@@ -75,13 +80,13 @@ extension ACMNetworking: URLSessionTaskDelegate {
     ///     - task: URL session task
     ///     - didFinishCollecting: Metrics that gathered
     public func urlSession(_: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
-        let message = ACMStringUtils.shared.merge(list: [
+        let message = mainEndpoint?.stringUtils?.merge(list: [
             "didFinishCollecting",
             task.description,
             "metrics",
             "\(metrics.taskInterval)",
         ])
-        ACMBaseLogger.info(message)
+        logger?.info(message)
     }
 
     /// URL Session taskIsWaitingForConnectivity
@@ -90,11 +95,11 @@ extension ACMNetworking: URLSessionTaskDelegate {
     ///     - session: URL Session
     ///     - task: URL session task
     public func urlSession(_: URLSession, taskIsWaitingForConnectivity task: URLSessionTask) {
-        let message = ACMStringUtils.shared.merge(list: [
+        let message = mainEndpoint?.stringUtils?.merge(list: [
             "taskIsWaitingForConnectivity",
             task.description,
         ])
-        ACMBaseLogger.info(message)
+        logger?.info(message)
     }
 
     /// URL Session didSendBodyData
@@ -106,7 +111,7 @@ extension ACMNetworking: URLSessionTaskDelegate {
     ///     - totalBytesSent
     ///     - totalBytesExpectedToSend
     public func urlSession(_: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
-        let message = ACMStringUtils.shared.merge(list: [
+        let message = mainEndpoint?.stringUtils?.merge(list: [
             "task",
             task.description,
             "didSendBodyData",
@@ -116,6 +121,6 @@ extension ACMNetworking: URLSessionTaskDelegate {
             "totalBytesExpectedToSend",
             "\(totalBytesExpectedToSend)",
         ])
-        ACMBaseLogger.info(message)
+        logger?.info(message)
     }
 }

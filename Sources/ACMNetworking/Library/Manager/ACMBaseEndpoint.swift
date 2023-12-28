@@ -8,13 +8,21 @@ import Foundation
 ///
 /// Base endpoint struct for holding endpoint information
 public struct ACMBaseEndpoint {
+    // MARK: Logger
+
+    var logger: ACMBaseLogger?
+
+    // MARK: String utils
+
+    var stringUtils: ACMStringUtils?
+
     // MARK: Config
 
     var config: ACMPlistModel?
 
     // MARK: Override fetching config file
 
-    var configOverride: Bool = false
+    var configOverride: Bool? = false
 
     // MARK: API host
 
@@ -22,7 +30,7 @@ public struct ACMBaseEndpoint {
 
     // MARK: API scheme, Default https
 
-    var scheme: ACMBaseScheme = .https
+    var scheme: ACMBaseScheme? = .https
 
     // MARK: The path for api access
 
@@ -42,7 +50,7 @@ public struct ACMBaseEndpoint {
 
     // MARK: Default method: GET
 
-    var method: ACMBaseMethod = .get
+    var method: ACMBaseMethod? = .get
 
     // MARK: Generated URL for making request
 
@@ -53,7 +61,9 @@ public struct ACMBaseEndpoint {
             return components?.url
         } else {
             var components = URLComponents()
-            components.scheme = scheme.rawValue
+            if let rawScheme = scheme?.rawValue {
+                components.scheme = rawScheme
+            }
             components.host = host
             components.path = updatedPath
             components.queryItems = queryItems
@@ -85,12 +95,14 @@ public struct ACMBaseEndpoint {
 
     var urlRequest: URLRequest? {
         guard let url = url else {
-            ACMBaseLogger.error(ACMNetworkConstants.errorURLMessage)
+            logger?.error(ACMNetworkConstants.errorURLMessage)
             return nil
         }
 
         var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = method.rawValue
+        if let methodRaw = method?.rawValue {
+            urlRequest.httpMethod = methodRaw
+        }
 
         if let header = authHeader {
             urlRequest.setValue(header.rawHeader, forHTTPHeaderField: ACMNetworkConstants.headerAuthorization)
@@ -127,13 +139,14 @@ public struct ACMBaseEndpoint {
         return URLSession(configuration: configuration, delegate: delegate, delegateQueue: delegateQueue)
     }
 
-    init(config: ACMPlistModel? = nil, configOverride: Bool, host: String? = nil, scheme: ACMBaseScheme, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod, authHeader: ACMAuthModel? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil, isStream: Bool = false, downloadURL: String? = nil) {
+    init(config: ACMPlistModel? = nil, configOverride: Bool? = nil, host: String? = nil, scheme: ACMBaseScheme? = nil, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod? = nil, authHeader: ACMAuthModel? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil, isStream: Bool = false, downloadURL: String? = nil) {
         if let config = config {
             self.config = config
         } else {
-            self.config = ACMPlistUtils.shared.config()
+            self.config = ACMPlistUtils().config()
         }
-        ACMBaseLogger.shared.config = self.config
+        logger = ACMBaseLogger(config: self.config)
+        stringUtils = ACMStringUtils()
         ACMNetworkingConstants.configOverride = configOverride
         if let host = host {
             self.host = host

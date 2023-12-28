@@ -10,7 +10,7 @@ import Foundation
 extension ACMNetworking {
     func generateURLRequest(endpoint: ACMBaseEndpoint) -> URLRequest? {
         guard let urlRequest = baseRequest(to: endpoint) else {
-            ACMBaseLogger.error(ACMNetworkConstants.urlRequestErrorMessage)
+            endpoint.logger?.error(ACMNetworkConstants.urlRequestErrorMessage)
             return nil
         }
         return urlRequest
@@ -22,11 +22,12 @@ extension ACMNetworking {
     func handleNilErrorResponse(with endpoint: ACMBaseEndpoint, error: Error?, onError: ACMGenericCallbacks.ErrorCallback) {
         guard error == nil else {
             cancel()
-            let message = ACMStringUtils.shared.merge(list: [
+
+            let message = endpoint.stringUtils?.merge(list: [
                 ACMNetworkConstants.errorMessage,
                 error?.localizedDescription ?? "",
             ])
-            ACMBaseLogger.error(message)
+            endpoint.logger?.error(message)
             onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: error?.localizedDescription, endpoint: endpoint))
             return
         }
@@ -38,11 +39,11 @@ extension ACMNetworking {
     func handleNilResponse(with endpoint: ACMBaseEndpoint, response: URLResponse?, onError: ACMGenericCallbacks.ErrorCallback) {
         guard response != nil else {
             cancel()
-            let message = ACMStringUtils.shared.merge(list: [
+            let message = endpoint.stringUtils?.merge(list: [
                 ACMNetworkConstants.errorMessage,
                 ACMNetworkConstants.responseNullMessage,
             ])
-            ACMBaseLogger.error(message)
+            endpoint.logger?.error(message)
             onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.responseNullMessage, endpoint: endpoint))
             return
         }
@@ -54,11 +55,11 @@ extension ACMNetworking {
     func handleConnectivityError(with endpoint: ACMBaseEndpoint, error: Error?, onError: ACMGenericCallbacks.ErrorCallback) {
         if error?.isConnectivityError ?? false {
             cancel()
-            let message = ACMStringUtils.shared.merge(list: [
+            let message = endpoint.stringUtils?.merge(list: [
                 ACMNetworkConstants.errorMessage,
                 ACMNetworkConstants.dataNullMessage,
             ])
-            ACMBaseLogger.error(message)
+            endpoint.logger?.error(message)
             onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.dataNullMessage, endpoint: endpoint))
             return
         }
@@ -70,11 +71,11 @@ extension ACMNetworking {
     func handleData(with endpoint: ACMBaseEndpoint, data: Data?, onError: ACMGenericCallbacks.ErrorCallback) -> Data? {
         guard let data = data else {
             cancel()
-            let message = ACMStringUtils.shared.merge(list: [
+            let message = endpoint.stringUtils?.merge(list: [
                 ACMNetworkConstants.errorMessage,
                 ACMNetworkConstants.dataNullMessage,
             ])
-            ACMBaseLogger.error(message)
+            endpoint.logger?.error(message)
             onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.dataNullMessage, endpoint: endpoint))
             return nil
         }
@@ -87,11 +88,11 @@ extension ACMNetworking {
     func handleHttpResponse(with endpoint: ACMBaseEndpoint, response: URLResponse?, onError: ACMGenericCallbacks.ErrorCallback) -> HTTPURLResponse? {
         guard let httpResponse = response as? HTTPURLResponse else {
             cancel()
-            let message = ACMStringUtils.shared.merge(list: [
+            let message = endpoint.stringUtils?.merge(list: [
                 ACMNetworkConstants.errorMessage,
                 ACMNetworkConstants.httpStatusError,
             ])
-            ACMBaseLogger.error(message)
+            endpoint.logger?.error(message)
             onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.httpStatusError, endpoint: endpoint))
             return nil
         }
@@ -109,14 +110,14 @@ extension ACMNetworking {
 extension ACMNetworking {
     /// Execute retry mechanism
     func executeRetry<T: Decodable>(with endpoint: ACMBaseEndpoint, httpResponse: HTTPURLResponse, data: Data, currentRetryCount: Int?, onSuccess: ACMGenericCallbacks.ResponseCallback<T>, onError: ACMGenericCallbacks.ErrorCallback) {
-        let message = ACMStringUtils.shared.merge(list: [
+        let message = endpoint.stringUtils?.merge(list: [
             ACMNetworkConstants.errorMessage,
             ACMNetworkConstants.httpStatusError,
             "-\(httpResponse.statusCode)",
             ACMNetworkConstants.responseInfoMessage,
             String(data: data, encoding: .utf8) ?? "",
         ])
-        ACMBaseLogger.error(message)
+        endpoint.logger?.error(message)
 
         // MARK: Retry mechanism
 
@@ -128,7 +129,7 @@ extension ACMNetworking {
 
         if let currentRetryCount = currentRetryCount, currentRetryCount < maxRetryCount {
             let nextRetryCount = currentRetryCount + 1
-            ACMBaseLogger.info(ACMStringUtils.shared.merge(list: [
+            endpoint.logger?.info(endpoint.stringUtils?.merge(list: [
                 String(format: ACMNetworkConstants.httpRetryCount, nextRetryCount, maxRetryCount),
             ]))
             request(to: endpoint, currentRetryCount: nextRetryCount, onSuccess: onSuccess, onError: onError)
@@ -143,11 +144,11 @@ extension ACMNetworking {
     func handleResult<T: Decodable>(with endpoint: ACMBaseEndpoint, data: Data, onSuccess: ACMGenericCallbacks.ResponseCallback<T>, onError: ACMGenericCallbacks.ErrorCallback) {
         do {
             let dataString = String(data: data, encoding: .utf8) ?? ""
-            let info = ACMStringUtils.shared.merge(list: [
+            let info = endpoint.stringUtils?.merge(list: [
                 ACMNetworkConstants.responseInfoMessage,
                 dataString,
             ])
-            ACMBaseLogger.info(info)
+            endpoint.logger?.info(info)
 
             if endpoint.isStream == true {
                 let components = dataString
@@ -169,31 +170,31 @@ extension ACMNetworking {
                 onSuccess?(responseObject)
             }
         } catch let DecodingError.dataCorrupted(context) {
-            let message = ACMStringUtils.shared.merge(list: [
+            let message = endpoint.stringUtils?.merge(list: [
                 context.debugDescription,
             ])
-            ACMBaseLogger.error(message)
+            endpoint.logger?.error(message)
         } catch let DecodingError.keyNotFound(key, context) {
-            let message = ACMStringUtils.shared.merge(list: [
+            let message = endpoint.stringUtils?.merge(list: [
                 "Key \(key) not found: \(context.debugDescription)",
                 "codingPath: \(context.codingPath)",
             ])
-            ACMBaseLogger.error(message)
+            endpoint.logger?.error(message)
         } catch let DecodingError.valueNotFound(value, context) {
-            let message = ACMStringUtils.shared.merge(list: [
+            let message = endpoint.stringUtils?.merge(list: [
                 "Value \(value) not found: \(context.debugDescription)",
                 "codingPath: \(context.codingPath)",
             ])
-            ACMBaseLogger.error(message)
+            endpoint.logger?.error(message)
         } catch let DecodingError.typeMismatch(type, context) {
-            let message = ACMStringUtils.shared.merge(list: [
+            let message = endpoint.stringUtils?.merge(list: [
                 "Type \(type) mismatch: \(context.debugDescription)",
                 "codingPath: \(context.codingPath)",
             ])
-            ACMBaseLogger.error(message)
+            endpoint.logger?.error(message)
         } catch let e {
             let errorMessage = String(format: ACMNetworkConstants.dataParseErrorMessage, e.localizedDescription)
-            ACMBaseLogger.warning(errorMessage)
+            endpoint.logger?.warning(errorMessage)
             onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: errorMessage, endpoint: endpoint))
         }
     }

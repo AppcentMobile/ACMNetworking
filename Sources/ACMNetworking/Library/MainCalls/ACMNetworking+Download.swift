@@ -26,7 +26,8 @@ public extension ACMNetworking {
     {
         guard let urlRequest = generateURLRequest(endpoint: endpoint) else { return }
 
-        downloadTask = endpoint.session(delegate: self).downloadTask(with: urlRequest) { [weak self] url, urlResponse, error in
+        session = endpoint.session(delegate: self)
+        downloadTask = session?.downloadTask(with: urlRequest) { [weak self] url, urlResponse, error in
             guard let self else { return }
 
             self.handleNilErrorResponse(with: endpoint, error: error, onError: onError)
@@ -43,8 +44,6 @@ public extension ACMNetworking {
             }
 
             self.cancel()
-            self.taskProgress?.invalidate()
-            self.taskProgress = nil
 
             do {
                 let searchUrl = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
@@ -66,7 +65,7 @@ public extension ACMNetworking {
                 onSuccess?(model)
             } catch let e {
                 let errorMessage = String(format: ACMNetworkConstants.genericErrorMessage, e.localizedDescription)
-                ACMBaseLogger.warning(errorMessage)
+                endpoint.logger?.warning(errorMessage)
                 onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: errorMessage, endpoint: endpoint))
             }
         }
