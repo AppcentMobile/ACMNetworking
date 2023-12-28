@@ -39,6 +39,8 @@ let endpoint = ACMEndpoint()
 ```bash
 network.request(to: endpoint) { (response: ProductResponse) in
                 print(response)
+            } onProgress: { model in {
+                print(model.formattedPercentage())
             } onError: { error in
                 print(error)
             }

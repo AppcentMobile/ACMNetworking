@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
     spec.name         = "ACMNetworking"
-    spec.version      = "1.1.7"
+    spec.version      = "1.1.8"
     spec.summary      = "ACMNetworking iOS Library"
     spec.description  = <<-DESC
             ACMNetworking is a package that help developers to make requests easily.
