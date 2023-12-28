@@ -42,6 +42,8 @@ public enum ACMNetworkConstants {
     public static var httpBodyMultipart = "Multipart data, length: %@"
     /// Info message for retry mechanism
     public static var httpRetryCount = "Current retry count is %d, total retry count is %d"
+    /// Error message if data is invalid and could not be parsed
+    public static var genericErrorMessage = "Generic error : %@"
 }
 
 public extension ACMNetworkConstants {

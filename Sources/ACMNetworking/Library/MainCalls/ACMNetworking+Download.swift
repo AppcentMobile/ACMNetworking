@@ -19,9 +19,10 @@ public extension ACMNetworking {
     /// - Returns:
     ///     - Void
     func download(to endpoint: ACMBaseEndpoint,
-                                currentRetryCount: Int? = 0,
-                                onSuccess: ACMGenericCallbacks.DownloadCallback,
-                                onError: ACMGenericCallbacks.ErrorCallback)
+                  currentRetryCount _: Int? = 0,
+                  onSuccess: ACMGenericCallbacks.DownloadCallback,
+                  onProgress: ACMGenericCallbacks.ProgressCallback = nil,
+                  onError: ACMGenericCallbacks.ErrorCallback = nil)
     {
         guard let urlRequest = generateURLRequest(endpoint: endpoint) else { return }
 
@@ -29,36 +30,52 @@ public extension ACMNetworking {
             guard let self else { return }
 
             self.handleNilErrorResponse(with: endpoint, error: error, onError: onError)
+            self.handleNilResponse(with: endpoint, response: urlResponse, onError: onError)
             self.handleConnectivityError(with: endpoint, error: error, onError: onError)
 
-            guard let url else { return }
-
-            guard let urlResponse else { return }
+            guard let url,
+                  let urlResponse,
+                  let httpResponse = self.handleHttpResponse(with: endpoint, response: urlResponse, onError: onError),
+                  let pathExtension = httpResponse.url?.pathExtension
+            else {
+                self.cancel()
+                return
+            }
 
             self.cancel()
+            self.taskProgress?.invalidate()
+            self.taskProgress = nil
 
             do {
-                let data = try Data(contentsOf: url)
+                let searchUrl = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+                let destinationDirectory = searchUrl
+                    .appendingPathComponent("ACMNetworking")
 
-                let model = ACMDownloadModel(data: data, localURL: url, response: urlResponse)
+                if !FileManager.default.fileExists(atPath: destinationDirectory.relativePath) {
+                    try FileManager.default.createDirectory(at: destinationDirectory, withIntermediateDirectories: true)
+                }
+
+                let destination = destinationDirectory.appendingPathComponent(url.lastPathComponent)
+                    .appendingPathExtension(pathExtension)
+
+                try FileManager.default.moveItem(at: url, to: destination)
+
+                let data = try Data(contentsOf: destination)
+
+                let model = ACMDownloadModel(data: data, localURL: destination, response: urlResponse)
                 onSuccess?(model)
-            } catch {}
-
-
-            /* guard let data = self.handleData(with: endpoint, data: data, onError: onError) else { return }
-             guard let httpResponse = self.handleHttpResponse(with: endpoint, response: response, onError: onError) else { return }
-
-             // Check if response is in valid http range
-             guard self.validateResponse(with: httpResponse) else {
-                 self.executeRetry(with: endpoint, httpResponse: httpResponse, data: data, currentRetryCount: currentRetryCount, onSuccess: onSuccess, onError: onError)
-                 return
-             }
-
-             self.cancel()
-
-             self.handleResult(with: endpoint, data: data, onSuccess: onSuccess, onError: onError)
-              */
+            } catch let e {
+                let errorMessage = String(format: ACMNetworkConstants.genericErrorMessage, e.localizedDescription)
+                ACMBaseLogger.warning(errorMessage)
+                onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: errorMessage, endpoint: endpoint))
+            }
         }
+
+        taskProgress = downloadTask?.progress.observe(\.fractionCompleted, changeHandler: { progress, _ in
+            let model = ACMProgressModel(progress: progress.fractionCompleted)
+            onProgress?(model)
+        })
+
         downloadTask?.resume()
     }
 }

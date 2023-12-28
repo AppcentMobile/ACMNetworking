@@ -8,6 +8,7 @@ import Foundation
 public class ACMNetworking: NSObject {
     var requestTask: URLSessionDataTask?
     var downloadTask: URLSessionDownloadTask?
+    var taskProgress: NSKeyValueObservation?
 
     /// Public Init function
     /// For creating object with SDK
