@@ -14,4 +14,8 @@ public enum ACMGenericCallbacks {
     public typealias InfoCallback = ((Bool?, Error?) -> Void)?
     /// Success callback with generic response for closures
     public typealias ResponseCallback<T> = ((T) -> Void)?
+    /// Success callback with generic response for closures
+    public typealias DownloadCallback = ((ACMDownloadModel) -> Void)?
+    /// Progress callback with generic response for closures
+    public typealias ProgressCallback = ((ACMProgressModel) -> Void)?
 }

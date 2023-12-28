@@ -3,5 +3,5 @@
 //
 
 enum ACMNetworkingConstants {
-    static var configOverride: Bool = false
+    static var configOverride: Bool? = false
 }

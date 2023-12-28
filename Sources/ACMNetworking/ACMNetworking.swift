@@ -6,7 +6,20 @@ import Foundation
 
 /// ACMNetworking, make requests easily
 public class ACMNetworking: NSObject {
-    private var task: URLSessionDataTask?
+    var mainEndpoint: ACMBaseEndpoint?
+    var session: URLSession?
+    var requestTask: URLSessionDataTask?
+    var downloadTask: URLSessionDownloadTask?
+    var taskProgress: NSKeyValueObservation?
+
+    /// Predefined variables
+    var logger: ACMBaseLogger? {
+        mainEndpoint?.logger
+    }
+
+    var stringUtils: ACMStringUtils? {
+        mainEndpoint?.stringUtils
+    }
 
     /// Public Init function
     /// For creating object with SDK
@@ -14,49 +27,33 @@ public class ACMNetworking: NSObject {
         super.init()
     }
 
-    /// Main request function
-    ///
-    /// - Parameters:
-    ///     - endpoint: base endpoint that keeps all endpoint information
-    ///     - currentRetryCount(Optional): retry request count
-    ///     - onSuccess: Callback for success scenario
-    ///     - onError: Callback for error scenario
-    ///
-    /// - Returns:
-    ///     - Void
-    public func request<T: Decodable>(to endpoint: ACMBaseEndpoint,
-                                      currentRetryCount: Int? = 0,
-                                      onSuccess: ACMGenericCallbacks.ResponseCallback<T>,
-                                      onError: ACMGenericCallbacks.ErrorCallback)
-    {
-        guard let urlRequest = generateURLRequest(endpoint: endpoint) else { return }
-
-        task = endpoint.session(delegate: self).dataTask(with: urlRequest) { [weak self] data, response, error in
-            guard let self else { return }
-
-            self.handleNilErrorResponse(with: endpoint, error: error, onError: onError)
-            self.handleNilResponse(with: endpoint, response: response, onError: onError)
-            self.handleConnectivityError(with: endpoint, error: error, onError: onError)
-
-            guard let data = self.handleData(with: endpoint, data: data, onError: onError) else { return }
-            guard let httpResponse = self.handleHttpResponse(with: endpoint, response: response, onError: onError) else { return }
-
-            // Check if response is in valid http range
-            guard self.validateResponse(with: httpResponse) else {
-                self.executeRetry(with: endpoint, httpResponse: httpResponse, data: data, currentRetryCount: currentRetryCount, onSuccess: onSuccess, onError: onError)
-                return
-            }
-
-            self.cancel()
-
-            self.handleResult(with: endpoint, data: data, onSuccess: onSuccess, onError: onError)
-        }
-        task?.resume()
+    /// Public destroy function
+    deinit {
+        print("ACMNetworking deinited")
     }
 
     /// Cancels the current network request
     public func cancel() {
-        task?.cancel()
-        task = nil
+        cancelRequestTask()
+        cancelDownloadTask()
+        session?.invalidateAndCancel()
+        session = nil
+        taskProgress?.invalidate()
+        taskProgress = nil
+        mainEndpoint = nil
+    }
+
+    private func cancelRequestTask() {
+        if requestTask?.state == .running {
+            requestTask?.cancel()
+        }
+        requestTask = nil
+    }
+
+    private func cancelDownloadTask() {
+        if downloadTask?.state == .running {
+            downloadTask?.cancel()
+        }
+        downloadTask = nil
     }
 }

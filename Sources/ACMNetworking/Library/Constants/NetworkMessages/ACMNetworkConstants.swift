@@ -42,6 +42,8 @@ public enum ACMNetworkConstants {
     public static var httpBodyMultipart = "Multipart data, length: %@"
     /// Info message for retry mechanism
     public static var httpRetryCount = "Current retry count is %d, total retry count is %d"
+    /// Error message if data is invalid and could not be parsed
+    public static var genericErrorMessage = "Generic error : %@"
 }
 
 public extension ACMNetworkConstants {
@@ -52,12 +54,12 @@ public extension ACMNetworkConstants {
     }
 
     /// Header for holding multipart header with content type
-    static func multipartHeader(model: ACMMultipartContentTypeModel) -> ACMHeaderModel {
-        ACMHeaderModel(field: "Content-Type", value: ACMStringUtils.shared.merge(list: [
+    static func multipartHeader(model: ACMMultipartContentTypeModel, utils: ACMStringUtils?) -> ACMHeaderModel {
+        ACMHeaderModel(field: "Content-Type", value: utils?.merge(list: [
             model.type,
             " ",
             model.boundary,
-        ]))
+        ]) ?? "")
     }
 
     /// Header for holding multipart accept type
