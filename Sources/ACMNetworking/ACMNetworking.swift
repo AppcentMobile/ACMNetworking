@@ -27,11 +27,6 @@ public class ACMNetworking: NSObject {
         super.init()
     }
 
-    /// Public destroy function
-    deinit {
-        print(ACMNetworkConstants.managerDeinitMessage)
-    }
-
     /// Cancels the current network request
     public func cancel() {
         cancelRequestTask()

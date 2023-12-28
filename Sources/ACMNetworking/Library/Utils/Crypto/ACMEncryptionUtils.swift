@@ -16,92 +16,74 @@ final class ACMEncryptionUtils {
         case .plain:
             return value
         case .md5:
-            return md5(value: stringRaw)
+            return md5(with: stringRaw)
         case .base64:
-            return base64(value: stringRaw)
+            return base64(with: stringRaw)
         case .sha1:
-            return sha1(value: stringRaw)
+            return sha1(with: stringRaw)
         case .sha256:
-            return sha256(value: stringRaw)
+            return sha256(with: stringRaw)
         case .sha384:
-            return sha384(value: stringRaw)
+            return sha384(with: stringRaw)
         case .sha512:
-            return sha512(value: stringRaw)
+            return sha512(with: stringRaw)
         }
     }
 
-    private func md5(value: String) -> String {
-        if #available(iOS 13, *) {
-            return Insecure.MD5.hash(data: Data(value.utf8))
-                .map {
-                    String(format: encFormat, $0)
-                }
-                .joined()
-        } else {
-            return ""
+    private func sha1(with string: String) -> String {
+        if #available(iOS 13.0, *) {
+            if let data = string.data(using: .utf8) {
+                let hashed = Insecure.SHA1.hash(data: data)
+                return hashed.compactMap { String(format: "%02x", $0) }.joined()
+            }
         }
+        return ""
     }
 
-    private func base64(value: String) -> String {
-        if #available(iOS 13, *) {
-            guard let data = Data(base64Encoded: value) else { return "" }
-            guard let str = String(data: data, encoding: .utf8) else { return "" }
-            return str
-        } else {
-            return ""
+    private func sha256(with string: String) -> String {
+        if #available(iOS 13.0, *) {
+            if let data = string.data(using: .utf8) {
+                let hashed = SHA256.hash(data: data)
+                return hashed.compactMap { String(format: "%02x", $0) }.joined()
+            }
         }
+        return ""
     }
 
-    private func sha1(value: String) -> String {
-        if #available(iOS 13, *) {
-            return Insecure.SHA1.hash(data: Data(value.utf8))
-                .map {
-                    String(format: encFormat, $0)
-                }
-                .joined()
-        } else {
-            return ""
+    private func sha384(with string: String) -> String {
+        if #available(iOS 13.0, *) {
+            if let data = string.data(using: .utf8) {
+                let hashed = SHA384.hash(data: data)
+                return hashed.compactMap { String(format: "%02x", $0) }.joined()
+            }
         }
+        return ""
     }
 
-    private func sha256(value: String) -> String {
-        if #available(iOS 13, *) {
-            guard let data = value.data(using: .utf8) else { return "" }
-            return SHA256.hash(data: data)
-                .map {
-                    String(format: encFormat, $0)
-                }
-                .joined()
-        } else {
-            return ""
+    private func sha512(with string: String) -> String {
+        if #available(iOS 13.0, *) {
+            if let data = string.data(using: .utf8) {
+                let hashed = SHA512.hash(data: data)
+                return hashed.compactMap { String(format: "%02x", $0) }.joined()
+            }
         }
+        return ""
     }
 
-    private func sha384(value: String) -> String {
-        if #available(iOS 13, *) {
-            guard let data = value.data(using: .utf8) else { return "" }
-            return SHA384.hash(data: data)
-                .map {
-                    String(format: encFormat, $0)
-                }
-                .joined()
-        } else {
-            return ""
+    private func md5(with string: String) -> String {
+        if #available(iOS 13.0, *) {
+            if let data = string.data(using: .utf8) {
+                let hashed = Insecure.MD5.hash(data: data)
+                return hashed.compactMap { String(format: "%02x", $0) }.joined()
+            }
         }
+        return ""
     }
 
-    private func sha512(value: String) -> String {
-        if #available(iOS 13, *) {
-            guard let data = value.data(using: .utf8) else { return "" }
-            return SHA512.hash(data: data)
-                .map {
-                    String(format: encFormat, $0)
-                }
-                .joined()
-        } else {
-            return ""
+    private func base64(with string: String) -> String {
+        if let data = string.data(using: .utf8) {
+            return data.base64EncodedString()
         }
+        return ""
     }
-
-    private let encFormat = "%02hhx"
 }
