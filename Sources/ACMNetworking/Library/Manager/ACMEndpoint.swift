@@ -11,8 +11,11 @@ public final class ACMEndpoint {
     /// Base init
     ///
     /// Init method for creating new object
-    public init() {}
+    public init() {
+        encryption = ACMEncryptionUtils()
+    }
 
+    var encryption: ACMEncryptionUtils?
     var mainEndpoint: ACMBaseEndpoint?
     var config: ACMPlistModel?
     var configOverride: Bool = false
@@ -150,11 +153,17 @@ public final class ACMEndpoint {
     ///     - Self
     public func add(header: ACMHeaderModel) -> Self {
         var headerList = [ACMHeaderModel]()
+
+        var headerFiltered = header
+        if let encVal = encryption?.encrypt(value: header.value, type: header.type) as? String {
+            headerFiltered.value = encVal
+        }
+
         if let list = headersModel, list.count > 0 {
             headerList = list
-            headerList.append(header)
+            headerList.append(headerFiltered)
         } else {
-            headerList.append(header)
+            headerList.append(headerFiltered)
         }
 
         headersModel = headerList
@@ -195,11 +204,17 @@ public final class ACMEndpoint {
     ///     - Self
     public func add(queryItem: ACMQueryModel) -> Self {
         var queryList = [ACMQueryModel]()
+
+        var queryFiltered = queryItem
+        if let encVal = encryption?.encrypt(value: queryFiltered.value, type: queryItem.type) as? String {
+            queryFiltered.value = encVal
+        }
+
         if let list = queryItemsModel, list.count > 0 {
             queryList = list
-            queryList.append(queryItem)
+            queryList.append(queryFiltered)
         } else {
-            queryList.append(queryItem)
+            queryList.append(queryFiltered)
         }
 
         queryItemsModel = queryList
@@ -228,11 +243,17 @@ public final class ACMEndpoint {
     ///     - Self
     public func add(param: ACMBodyModel) -> Self {
         var paramList = [ACMBodyModel]()
+
+        var paramFiltered = param
+        if let encVal = encryption?.encrypt(value: param.value, type: param.type) {
+            paramFiltered.value = encVal
+        }
+
         if let list = paramsModel, list.count > 0 {
             paramList = list
-            paramList.append(param)
+            paramList.append(paramFiltered)
         } else {
-            paramList.append(param)
+            paramList.append(paramFiltered)
         }
 
         paramsModel = paramList

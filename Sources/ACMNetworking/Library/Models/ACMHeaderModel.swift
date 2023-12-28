@@ -8,6 +8,7 @@
 public struct ACMHeaderModel {
     var field: String
     var value: String
+    var type: ACMEncryptType
 
     /// Public Init function
     /// For creating header
@@ -16,8 +17,9 @@ public struct ACMHeaderModel {
     ///      - value: Header value
     ///    - Returns
     ///      - Void
-    public init(field: String, value: String) {
+    public init(field: String, value: String, type: ACMEncryptType = .plain) {
         self.field = field
         self.value = value
+        self.type = type
     }
 }
