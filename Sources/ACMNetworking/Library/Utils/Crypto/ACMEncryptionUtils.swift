@@ -8,6 +8,7 @@
 import CryptoKit
 import Foundation
 
+@available(iOS 13.0, *)
 final class ACMEncryptionUtils {
     func encrypt(value: Any, type: ACMEncryptType) -> Any {
         let stringRaw = String(describing: value)
@@ -31,51 +32,42 @@ final class ACMEncryptionUtils {
     }
 
     private func sha1(with string: String) -> String {
-        if #available(iOS 13.0, *) {
-            if let data = string.data(using: .utf8) {
-                let hashed = Insecure.SHA1.hash(data: data)
-                return hashed.compactMap { String(format: "%02x", $0) }.joined()
-            }
+        if let data = string.data(using: .utf8) {
+            let hashed = Insecure.SHA1.hash(data: data)
+            return hashed.compactMap { String(format: "%02x", $0) }.joined()
         }
+
         return ""
     }
 
     private func sha256(with string: String) -> String {
-        if #available(iOS 13.0, *) {
-            if let data = string.data(using: .utf8) {
-                let hashed = SHA256.hash(data: data)
-                return hashed.compactMap { String(format: "%02x", $0) }.joined()
-            }
+        if let data = string.data(using: .utf8) {
+            let hashed = SHA256.hash(data: data)
+            return hashed.compactMap { String(format: "%02x", $0) }.joined()
         }
         return ""
     }
 
     private func sha384(with string: String) -> String {
-        if #available(iOS 13.0, *) {
-            if let data = string.data(using: .utf8) {
-                let hashed = SHA384.hash(data: data)
-                return hashed.compactMap { String(format: "%02x", $0) }.joined()
-            }
+        if let data = string.data(using: .utf8) {
+            let hashed = SHA384.hash(data: data)
+            return hashed.compactMap { String(format: "%02x", $0) }.joined()
         }
         return ""
     }
 
     private func sha512(with string: String) -> String {
-        if #available(iOS 13.0, *) {
-            if let data = string.data(using: .utf8) {
-                let hashed = SHA512.hash(data: data)
-                return hashed.compactMap { String(format: "%02x", $0) }.joined()
-            }
+        if let data = string.data(using: .utf8) {
+            let hashed = SHA512.hash(data: data)
+            return hashed.compactMap { String(format: "%02x", $0) }.joined()
         }
         return ""
     }
 
     private func md5(with string: String) -> String {
-        if #available(iOS 13.0, *) {
-            if let data = string.data(using: .utf8) {
-                let hashed = Insecure.MD5.hash(data: data)
-                return hashed.compactMap { String(format: "%02x", $0) }.joined()
-            }
+        if let data = string.data(using: .utf8) {
+            let hashed = Insecure.MD5.hash(data: data)
+            return hashed.compactMap { String(format: "%02x", $0) }.joined()
         }
         return ""
     }
