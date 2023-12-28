@@ -5,7 +5,7 @@
 //  Created by burak on 22.12.2023.
 //
 
-import UIKit
+import Foundation
 
 public extension ACMNetworking {
     /// Main request function
