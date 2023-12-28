@@ -44,6 +44,8 @@ public enum ACMNetworkConstants {
     public static var httpRetryCount = "Current retry count is %d, total retry count is %d"
     /// Error message if data is invalid and could not be parsed
     public static var genericErrorMessage = "Generic error : %@"
+    /// Message if ACMNetworking deinited
+    public static var managerDeinitMessage = "ACMNetworking deinited"
 }
 
 public extension ACMNetworkConstants {

@@ -29,7 +29,7 @@ public class ACMNetworking: NSObject {
 
     /// Public destroy function
     deinit {
-        print("ACMNetworking deinited")
+        print(ACMNetworkConstants.managerDeinitMessage)
     }
 
     /// Cancels the current network request
