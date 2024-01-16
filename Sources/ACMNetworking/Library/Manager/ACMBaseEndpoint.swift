@@ -12,6 +12,10 @@ public struct ACMBaseEndpoint {
 
     var logger: ACMBaseLogger?
 
+    // MARK: PList utils
+
+    var plistUtils: ACMPlistUtils?
+
     // MARK: String utils
 
     var stringUtils: ACMStringUtils?
@@ -140,10 +144,11 @@ public struct ACMBaseEndpoint {
     }
 
     init(config: ACMPlistModel? = nil, configOverride: Bool? = nil, host: String? = nil, scheme: ACMBaseScheme? = nil, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod? = nil, authHeader: ACMAuthModel? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil, isStream: Bool = false, downloadURL: String? = nil) {
+        self.plistUtils = ACMPlistUtils()
         if let config = config {
             self.config = config
         } else {
-            self.config = ACMPlistUtils().config()
+            self.config = self.plistUtils?.config()
         }
         logger = ACMBaseLogger(config: self.config)
         stringUtils = ACMStringUtils()
