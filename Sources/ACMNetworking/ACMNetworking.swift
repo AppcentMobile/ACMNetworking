@@ -17,8 +17,12 @@ public class ACMNetworking: NSObject {
         mainEndpoint?.logger
     }
 
-    var stringUtils: ACMStringUtils? {
+    public var stringUtils: ACMStringUtils? {
         mainEndpoint?.stringUtils
+    }
+
+    public var plistUtils: ACMPlistUtils? {
+        mainEndpoint?.plistUtils
     }
 
     /// Public Init function
