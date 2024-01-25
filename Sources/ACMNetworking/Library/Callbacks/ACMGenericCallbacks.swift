@@ -2,6 +2,8 @@
 //  ACMGenericCallbacks.swift
 //
 
+import Foundation
+
 /// ACMGenericCallbacks
 ///
 /// Enumaration for holding the callbacks
@@ -13,9 +15,12 @@ public enum ACMGenericCallbacks {
     /// Info callback with success check and error for generic closures
     public typealias InfoCallback = ((Bool?, Error?) -> Void)?
     /// Success callback with generic response for closures
-    public typealias ResponseCallback<T> = ((T) -> Void)?
+    public typealias ResponseCallback<Codable> = ((Codable) -> Void)?
     /// Success callback with generic response for closures
     public typealias DownloadCallback = ((ACMDownloadModel) -> Void)?
     /// Progress callback with generic response for closures
     public typealias ProgressCallback = ((ACMProgressModel) -> Void)?
+    /// Success callback with generic response for closures
+    public typealias StreamCallback = ((Data) -> Void)
+
 }

@@ -20,6 +20,10 @@ public struct ACMBaseEndpoint {
 
     var stringUtils: ACMStringUtils?
 
+    // MARK: Enc utils
+
+    var encUtils: ACMEncryptionUtils?
+
     // MARK: Config
 
     var config: ACMPlistModel?
