@@ -6,29 +6,36 @@ import Foundation
 
 /// ACMNetworking, make requests easily
 public class ACMNetworking: NSObject {
-    var mainEndpoint: ACMBaseEndpoint?
+    var endpoint: ACMEndpoint?
+
+    public func getBaseEndpoint() -> ACMBaseEndpoint? {
+        getEndpoint().build()
+    }
+
+    public func getEndpoint() -> ACMEndpoint {
+        endpoint ?? ACMEndpoint()
+    }
+
+    public func getPlistUtils() -> ACMPlistUtils {
+        getBaseEndpoint()?.plistUtils ?? ACMPlistUtils()
+    }
+
+    public func getStrUtils() -> ACMStringUtils {
+        getBaseEndpoint()?.stringUtils ?? ACMStringUtils()
+    }
+
     var session: URLSession?
     var requestTask: URLSessionDataTask?
     var downloadTask: URLSessionDownloadTask?
     var taskProgress: NSKeyValueObservation?
 
-    /// Predefined variables
-    var logger: ACMBaseLogger? {
-        mainEndpoint?.logger
-    }
-
-    public var stringUtils: ACMStringUtils? {
-        mainEndpoint?.stringUtils
-    }
-
-    public var plistUtils: ACMPlistUtils? {
-        mainEndpoint?.plistUtils
-    }
+    var onPartial: ACMGenericCallbacks.StreamCallback?
 
     /// Public Init function
     /// For creating object with SDK
     override public init() {
         super.init()
+        endpoint = ACMEndpoint()
     }
 
     /// Cancels the current network request
@@ -39,7 +46,7 @@ public class ACMNetworking: NSObject {
         session = nil
         taskProgress?.invalidate()
         taskProgress = nil
-        mainEndpoint = nil
+        endpoint = nil
     }
 
     private func cancelRequestTask() {

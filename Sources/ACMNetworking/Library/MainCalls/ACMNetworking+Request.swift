@@ -8,6 +8,25 @@
 import Foundation
 
 public extension ACMNetworking {
+    func stream(to endpoint: ACMBaseEndpoint,
+                currentRetryCount: Int? = 0,
+                onPartial: @escaping ACMGenericCallbacks.StreamCallback,
+                onProgress: ACMGenericCallbacks.ProgressCallback = nil,
+                onError: ACMGenericCallbacks.ErrorCallback = nil) {
+        self.onPartial = onPartial
+
+        session = endpoint.session(delegate: self)
+        guard let urlRequest = generateURLRequest(endpoint: endpoint) else { return }
+        requestTask = session?.dataTask(with: urlRequest)
+
+        taskProgress = requestTask?.progress.observe(\.fractionCompleted, changeHandler: { progress, _ in
+            let model = ACMProgressModel(progress: progress.fractionCompleted)
+            onProgress?(model)
+        })
+
+        requestTask?.resume()
+    }
+
     /// Main request function
     ///
     /// - Parameters:
@@ -21,14 +40,12 @@ public extension ACMNetworking {
     func request<T: Decodable>(to endpoint: ACMBaseEndpoint,
                                currentRetryCount: Int? = 0,
                                onSuccess: ACMGenericCallbacks.ResponseCallback<T>,
+                               onPartial: ACMGenericCallbacks.ResponseCallback<T> = nil,
                                onProgress: ACMGenericCallbacks.ProgressCallback = nil,
-                               onError: ACMGenericCallbacks.ErrorCallback = nil)
-    {
+                               onError: ACMGenericCallbacks.ErrorCallback = nil) {
         guard let urlRequest = generateURLRequest(endpoint: endpoint) else { return }
 
-        mainEndpoint = endpoint
-
-        session = mainEndpoint?.session(delegate: self)
+        session = endpoint.session(delegate: self)
 
         requestTask = session?.dataTask(with: urlRequest) { [weak self] data, response, error in
             guard let self else { return }

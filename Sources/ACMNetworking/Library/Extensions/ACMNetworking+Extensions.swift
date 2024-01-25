@@ -72,7 +72,24 @@ extension ACMNetworking {
     }
 }
 
-extension ACMNetworking: URLSessionTaskDelegate {
+extension ACMNetworking: URLSessionTaskDelegate, URLSessionDelegate, URLSessionDataDelegate {
+    /// URL Session data task for stream requests
+    public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        let dataString = String(data: data, encoding: .utf8) ?? ""
+        if !dataString.contains("[DONE]") {
+            let response = dataString.components(separatedBy: "\n")
+                .filter{ !$0.replacingOccurrences(of: " ", with: "").isEmpty }
+                .map { $0.replacingOccurrences(of: "data:", with: "")
+                    .replacingOccurrences(of: " ", with: "")
+                }
+            for item in response {
+                if let data = item.toData {
+                    onPartial?(data)
+                }
+            }
+        }
+    }
+
     /// URL Session didFinishCollecting
     ///
     ///  - Parameters:
@@ -80,13 +97,13 @@ extension ACMNetworking: URLSessionTaskDelegate {
     ///     - task: URL session task
     ///     - didFinishCollecting: Metrics that gathered
     public func urlSession(_: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
-        let message = mainEndpoint?.stringUtils?.merge(list: [
+        let message = getBaseEndpoint()?.stringUtils?.merge(list: [
             "didFinishCollecting",
             task.description,
             "metrics",
             "\(metrics.taskInterval)",
         ])
-        logger?.info(message)
+        getBaseEndpoint()?.logger?.info(message)
     }
 
     /// URL Session taskIsWaitingForConnectivity
@@ -95,11 +112,11 @@ extension ACMNetworking: URLSessionTaskDelegate {
     ///     - session: URL Session
     ///     - task: URL session task
     public func urlSession(_: URLSession, taskIsWaitingForConnectivity task: URLSessionTask) {
-        let message = mainEndpoint?.stringUtils?.merge(list: [
+        let message = getBaseEndpoint()?.stringUtils?.merge(list: [
             "taskIsWaitingForConnectivity",
             task.description,
         ])
-        logger?.info(message)
+        getBaseEndpoint()?.logger?.info(message)
     }
 
     /// URL Session didSendBodyData
@@ -111,7 +128,7 @@ extension ACMNetworking: URLSessionTaskDelegate {
     ///     - totalBytesSent
     ///     - totalBytesExpectedToSend
     public func urlSession(_: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
-        let message = mainEndpoint?.stringUtils?.merge(list: [
+        let message = getBaseEndpoint()?.stringUtils?.merge(list: [
             "task",
             task.description,
             "didSendBodyData",
@@ -121,6 +138,6 @@ extension ACMNetworking: URLSessionTaskDelegate {
             "totalBytesExpectedToSend",
             "\(totalBytesExpectedToSend)",
         ])
-        logger?.info(message)
+        getBaseEndpoint()?.logger?.info(message)
     }
 }
