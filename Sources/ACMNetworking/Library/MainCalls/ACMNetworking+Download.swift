@@ -62,6 +62,8 @@ public extension ACMNetworking {
                 let data = try Data(contentsOf: destination)
 
                 let model = ACMDownloadModel(data: data, localURL: destination, response: urlResponse)
+                endpoint.logger?.info(ACMNetworkConstants.downloadMessage)
+
                 onSuccess?(model)
             } catch let e {
                 let errorMessage = String(format: ACMNetworkConstants.genericErrorMessage, e.localizedDescription)

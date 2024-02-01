@@ -46,6 +46,8 @@ public enum ACMNetworkConstants {
     public static var genericErrorMessage = "Generic error : %@"
     /// Message if ACMNetworking deinited
     public static var managerDeinitMessage = "ACMNetworking deinited"
+    /// Download
+    public static var downloadMessage = "ACMNetworking download message"
 }
 
 public extension ACMNetworkConstants {
