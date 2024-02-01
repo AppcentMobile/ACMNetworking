@@ -11,7 +11,7 @@ public enum ACMGenericCallbacks {
     /// Void callback for generic closures
     public typealias VoidCallback = (() -> Void)?
     /// Error callback for generic closures
-    public typealias ErrorCallback = ((Error?) -> Void)?
+    public typealias ErrorCallback = ((ACMBaseNetworkError?) -> Void)?
     /// Info callback with success check and error for generic closures
     public typealias InfoCallback = ((Bool?, Error?) -> Void)?
     /// Success callback with generic response for closures
@@ -21,6 +21,5 @@ public enum ACMGenericCallbacks {
     /// Progress callback with generic response for closures
     public typealias ProgressCallback = ((ACMProgressModel) -> Void)?
     /// Success callback with generic response for closures
-    public typealias StreamCallback = ((Data) -> Void)
-
+    public typealias StreamCallback = (Data) -> Void
 }

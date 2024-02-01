@@ -7,7 +7,7 @@ import Foundation
 /// ACMBodyEncoder
 ///
 /// Encoder for body payload
-final class ACMBodyEncoder {
+enum ACMBodyEncoder {
     /// Encode function
     /// For creating body payload
     ///    - Parameters:
