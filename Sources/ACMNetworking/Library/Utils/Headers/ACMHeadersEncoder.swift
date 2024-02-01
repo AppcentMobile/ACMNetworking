@@ -7,7 +7,7 @@ import Foundation
 /// ACMHeadersEncoder
 ///
 /// Encoder for headers
-final class ACMHeadersEncoder {
+enum ACMHeadersEncoder {
     /// Encode function
     /// For creating headers
     ///    - Parameters:

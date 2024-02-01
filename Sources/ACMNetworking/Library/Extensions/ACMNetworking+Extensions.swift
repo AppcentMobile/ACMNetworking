@@ -74,11 +74,11 @@ extension ACMNetworking {
 
 extension ACMNetworking: URLSessionTaskDelegate, URLSessionDelegate, URLSessionDataDelegate {
     /// URL Session data task for stream requests
-    public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+    public func urlSession(_: URLSession, dataTask _: URLSessionDataTask, didReceive data: Data) {
         let dataString = String(data: data, encoding: .utf8) ?? ""
         if !dataString.contains("[DONE]") {
             let response = dataString.components(separatedBy: "\n")
-                .filter{ !$0.replacingOccurrences(of: " ", with: "").isEmpty }
+                .filter { !$0.replacingOccurrences(of: " ", with: "").isEmpty }
                 .map { $0.replacingOccurrences(of: "data:", with: "")
                     .replacingOccurrences(of: " ", with: "")
                 }

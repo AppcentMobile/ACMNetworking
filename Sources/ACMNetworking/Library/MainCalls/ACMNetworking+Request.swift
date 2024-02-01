@@ -9,10 +9,11 @@ import Foundation
 
 public extension ACMNetworking {
     func stream(to endpoint: ACMBaseEndpoint,
-                currentRetryCount: Int? = 0,
+                currentRetryCount _: Int? = 0,
                 onPartial: @escaping ACMGenericCallbacks.StreamCallback,
                 onProgress: ACMGenericCallbacks.ProgressCallback = nil,
-                onError: ACMGenericCallbacks.ErrorCallback = nil) {
+                onError _: ACMGenericCallbacks.ErrorCallback = nil)
+    {
         self.onPartial = onPartial
 
         session = endpoint.session(delegate: self)
@@ -40,9 +41,10 @@ public extension ACMNetworking {
     func request<T: Decodable>(to endpoint: ACMBaseEndpoint,
                                currentRetryCount: Int? = 0,
                                onSuccess: ACMGenericCallbacks.ResponseCallback<T>,
-                               onPartial: ACMGenericCallbacks.ResponseCallback<T> = nil,
+                               onPartial _: ACMGenericCallbacks.ResponseCallback<T> = nil,
                                onProgress: ACMGenericCallbacks.ProgressCallback = nil,
-                               onError: ACMGenericCallbacks.ErrorCallback = nil) {
+                               onError: ACMGenericCallbacks.ErrorCallback = nil)
+    {
         guard let urlRequest = generateURLRequest(endpoint: endpoint) else { return }
 
         session = endpoint.session(delegate: self)
@@ -65,7 +67,7 @@ public extension ACMNetworking {
 
             self.cancel()
 
-            self.handleResult(with: endpoint, data: data, onSuccess: onSuccess, onError: onError)
+            self.handleResult(with: endpoint, httpResponse: httpResponse, data: data, onSuccess: onSuccess, onError: onError)
         }
 
         taskProgress = requestTask?.progress.observe(\.fractionCompleted, changeHandler: { progress, _ in

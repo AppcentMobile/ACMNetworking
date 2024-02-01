@@ -44,7 +44,7 @@ extension ACMNetworking {
                 ACMNetworkConstants.responseNullMessage,
             ])
             endpoint.logger?.error(message)
-            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.responseNullMessage, endpoint: endpoint))
+            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: ACMNetworkConstants.responseNullMessage, endpoint: endpoint, statusCode: 200))
             return
         }
     }
@@ -141,7 +141,7 @@ extension ACMNetworking {
 
 extension ACMNetworking {
     /// Handle server response
-    func handleResult<T: Decodable>(with endpoint: ACMBaseEndpoint, data: Data, onSuccess: ACMGenericCallbacks.ResponseCallback<T>, onError: ACMGenericCallbacks.ErrorCallback) {
+    func handleResult<T: Decodable>(with endpoint: ACMBaseEndpoint, httpResponse: HTTPURLResponse, data: Data, onSuccess: ACMGenericCallbacks.ResponseCallback<T>, onError: ACMGenericCallbacks.ErrorCallback) {
         do {
             let dataString = String(data: data, encoding: .utf8) ?? ""
             let info = endpoint.stringUtils?.merge(list: [
@@ -195,7 +195,7 @@ extension ACMNetworking {
         } catch let e {
             let errorMessage = String(format: ACMNetworkConstants.dataParseErrorMessage, e.localizedDescription)
             endpoint.logger?.warning(errorMessage)
-            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: errorMessage, endpoint: endpoint))
+            onError?(ACMBaseNetworkError(message: ACMNetworkConstants.errorMessage, log: errorMessage, endpoint: endpoint, statusCode: httpResponse.statusCode))
         }
     }
 }

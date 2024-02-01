@@ -148,11 +148,11 @@ public struct ACMBaseEndpoint {
     }
 
     init(config: ACMPlistModel? = nil, configOverride: Bool? = nil, host: String? = nil, scheme: ACMBaseScheme? = nil, path: String = "", queryItems: [URLQueryItem]? = nil, params: [String: Any?]? = nil, headers: NSMutableDictionary? = nil, method: ACMBaseMethod? = nil, authHeader: ACMAuthModel? = nil, mediaData: NSMutableData? = nil, retryCount: Int? = nil, isStream: Bool = false, downloadURL: String? = nil) {
-        self.plistUtils = ACMPlistUtils()
+        plistUtils = ACMPlistUtils()
         if let config = config {
             self.config = config
         } else {
-            self.config = self.plistUtils?.config()
+            self.config = plistUtils?.config()
         }
         logger = ACMBaseLogger(config: self.config)
         stringUtils = ACMStringUtils()

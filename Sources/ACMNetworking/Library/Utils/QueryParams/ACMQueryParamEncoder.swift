@@ -7,7 +7,7 @@ import Foundation
 /// ACMQueryParamEncoder
 ///
 /// Encoder for query parameters
-final class ACMQueryParamEncoder {
+enum ACMQueryParamEncoder {
     /// Static function for encode
     /// Creates queryitem list with given query model list
     ///    - Parameters:
