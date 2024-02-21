@@ -23,7 +23,21 @@ enum ACMBodyEncoder {
                     if let dict = item.dictionary {
                         $0[$1.key] = dict
                     } else if let arrayOfCodable = $1.value as? [Codable] {
-                        $0[$1.key] = arrayOfCodable.map { $0.dictionary }
+                        $0[$1.key] = arrayOfCodable.map { item in
+                            if let dict = item.dictionary {
+                                return dict
+                            } else if let str = item as? String {
+                                if let data = str.data(using: .utf8, allowLossyConversion: true),
+                                   let list = try? JSONSerialization.jsonObject(with: data, options: .mutableLeaves) as? [String: Any]
+                                {
+                                    return list
+                                } else {
+                                    return [:]
+                                }
+                            } else {
+                                return [:]
+                            }
+                        }
                     } else {
                         $0[$1.key] = ""
                     }
