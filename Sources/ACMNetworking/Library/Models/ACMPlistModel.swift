@@ -22,6 +22,12 @@ open class ACMPlistModel: Codable {
         case isLogEnabled
     }
 
+    public init(baseURL: String, timeout: Double, isLogEnabled: Bool) {
+        self.baseURL = baseURL
+        self.timeout = timeout
+        self.isLogEnabled = isLogEnabled
+    }
+
     open func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(baseURL, forKey: .baseURL)
