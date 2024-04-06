@@ -41,11 +41,13 @@ public extension ACMNetworking {
     func request<T: Decodable>(to endpoint: ACMBaseEndpoint,
                                currentRetryCount: Int? = 0,
                                onSuccess: ACMGenericCallbacks.ResponseCallback<T>,
-                               onPartial _: ACMGenericCallbacks.ResponseCallback<T> = nil,
+                               onPartial: ACMGenericCallbacks.StreamCallback? = nil,
                                onProgress: ACMGenericCallbacks.ProgressCallback = nil,
                                onError: ACMGenericCallbacks.ErrorCallback = nil)
     {
         guard let urlRequest = generateURLRequest(endpoint: endpoint) else { return }
+
+        self.onPartial = onPartial
 
         session = endpoint.session(delegate: self)
 

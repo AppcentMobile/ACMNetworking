@@ -8,6 +8,9 @@ import Foundation
 ///
 /// Base endpoint struct for holding endpoint information
 public struct ACMBaseEndpoint {
+    // MARK: Unique id
+    var id: String
+
     // MARK: Logger
 
     var logger: ACMBaseLogger?
@@ -173,6 +176,7 @@ public struct ACMBaseEndpoint {
         self.retryCount = retryCount
         self.isStream = isStream
         self.downloadURL = downloadURL
+        self.id = stringUtils?.uniqueID ?? ""
     }
 }
 
